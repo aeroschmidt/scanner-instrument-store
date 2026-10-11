@@ -5,26 +5,26 @@
 
 ## O que acontece quando um PR é aberto
 
-O workflow de build compila o projeto e executa seus testes. O workflow CodeQL faz análise estática do código e publica os resultados no pull request e em **Security > Code scanning**. Em Advanced setup, o workflow é definido em YAML e pode ser ajustado para os eventos, linguagens e modos de build necessários.
+O workflow de build compila o projeto e executa seus testes. O CodeQL está configurado no **Default setup** do GitHub e publica os resultados do Code Scanning. Um workflow separado, **Code Scanning metrics**, prepara um arquivo baixável com um retrato dos alertas e das análises que a API do GitHub registrou. Em Default setup, o GitHub administra as análises; a rotina de métricas não configura nem inicia o CodeQL.
 
 O material do GitHub abaixo compara a configuração gerenciada pelo GitHub (Default setup) com Advanced setup, que cria um workflow editável. É uma explicação geral do produto, não uma captura do código do PR.
 
 ![Material do GitHub Docs comparando Default setup e Advanced setup](capturas/05-github-docs-default-advanced.png)
 
-O agendamento diário executa uma nova análise da branch padrão. Ele não cria commits, não sincroniza branches e não mescla pull requests.
+Depois que a mantenedora aprovar e mesclar o workflow, PRs futuros para `main` também terão uma execução **Code Scanning metrics**. O workflow usa a versão confiável da branch base e não executa o código do PR para obter as métricas. Ele também gera um snapshot diário ao meio-dia de Brasília. Esse horário agenda o relatório, não uma análise CodeQL. A frequência da análise CodeQL é administrada pelo Default setup nas configurações do repositório.
 
 ## Relatório de métricas de uma execução
 
 O workflow também gera um relatório baixável com o estado dos alertas e as análises que a API do GitHub registrou para o branch ou PR daquela execução. Para obter:
 
-1. Abra **Actions** no repositório.
-2. Entre na execução **CodeQL Advanced** relacionada ao seu push ou PR.
+1. Depois que a mantenedora aprovar e mesclar a alteração, abra **Actions** no repositório.
+2. Entre na execução **Code Scanning metrics** relacionada ao seu push ou PR.
 3. Na página de resumo, baixe o artifact `code-scanning-metrics-...` na seção **Artifacts**.
-4. Extraia o ZIP. `alerts-summary.csv` resume alertas abertos, dispensados e corrigidos por severidade. `dismissal-reasons.csv` resume os motivos dos alertas atualmente dispensados. `analysis-configurations.csv` lista categoria, ferramenta, horário, commit, quantidade de resultados e regras executadas. `snapshot.json` reúne esses dados e o contexto da execução.
+4. Extraia o ZIP. `alerts-summary.csv` resume alertas abertos, dispensados e corrigidos por severidade. `dismissal-reasons.csv` resume os motivos dos alertas atualmente dispensados. `analysis-configurations.csv` lista categoria, ferramenta, horário, commit, quantidade de resultados, regras executadas e se aquela categoria corresponde ao commit da execução. `snapshot.json` reúne esses dados e o contexto da execução, incluindo `analysis.matched_current_execution`.
 
-Os relatórios não mostram quem dispensou alertas, comentários, caminhos de arquivos nem detalhes individuais. A contagem de dismiss representa alertas que estão dispensados naquele momento do snapshot, não o total de ações de dismiss já realizadas. Compare snapshots de execuções diferentes para acompanhar a evolução. Os arquivos expiram em até 90 dias; baixe os que precisar guardar.
+Os relatórios não mostram quem dispensou alertas, comentários, caminhos de arquivos nem detalhes individuais. A contagem de dismiss representa alertas que estão dispensados naquele momento do snapshot, não o total de ações de dismiss já realizadas. Compare snapshots de execuções diferentes para acompanhar a evolução. As categorias mostram as análises registradas, mas a API usada não informa quantos arquivos-fonte foram examinados. Em execuções de push/PR, a rotina aguarda até dez minutos pela análise correspondente; se `matched_current_execution` for `false`, as análises listadas são apenas as mais recentes disponíveis. O snapshot diário registra o estado atual e pode listar uma análise CodeQL anterior àquele dia. Os arquivos expiram em até 90 dias; baixe os que precisar guardar.
 
-Uma análise CodeQL concluída não garante que não há alertas. Confira também o resultado agregado em **Security > Code scanning** e leia os detalhes do alerta antes de corrigir ou pedir revisão. Se o job de análise falhou, confira o resultado do job no snapshot e o commit/horário listado antes de usar as métricas.
+Uma análise CodeQL concluída não garante que não há alertas. Confira também o resultado agregado em **Security > Code scanning** e leia os detalhes do alerta antes de corrigir ou pedir revisão. O snapshot não contém o resultado interno do job CodeQL gerenciado; se `matched_current_execution` for `false`, confira a execução CodeQL em **Actions** e trate as categorias listadas como análises anteriores.
 
 ## Como interpretar os resultados
 
@@ -42,7 +42,7 @@ Um check vermelho não bloqueia merge por si só. A administração precisa torn
 1. Abra o alerta a partir do PR ou de **Security > Code scanning**.
 2. Leia a regra e a explicação do fluxo. Confirme qual dado é controlado por entrada externa e onde ele chega a uma operação sensível.
 3. Corrija a causa no código e acrescente ou ajuste testes quando fizer sentido.
-4. Envie um commit para a mesma branch do PR. Os checks de build e CodeQL serão executados novamente.
+4. Envie um commit para a mesma branch do PR. O build, o CodeQL conforme o Default setup e o workflow de métricas serão executados conforme seus próprios gatilhos.
 5. Confirme que o alerta foi atualizado ou fechado e peça revisão.
 
 Não descarte um alerta apenas para deixar o check verde. Use dismiss somente quando a análise confirmar que é falso positivo ou que existe uma justificativa aceita pela política da organização.

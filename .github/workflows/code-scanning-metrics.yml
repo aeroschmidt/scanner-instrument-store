@@ -1,0 +1,41 @@
+name: Code Scanning metrics
+
+on:
+  push:
+    branches: [main]
+  # Use the trusted base-branch workflow/script and never check out PR code.
+  pull_request_target:
+    branches: [main]
+  schedule:
+    - cron: '0 12 * * *'
+      timezone: America/Sao_Paulo
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  export-metrics:
+    name: Export Code Scanning metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+
+      - name: Generate JSON and CSV report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEQL_WAIT_TIMEOUT_SECONDS: 600
+          CODEQL_WAIT_INTERVAL_SECONDS: 30
+        run: python3 scripts/export_code_scanning_metrics.py
+
+      - name: Upload report snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-scanning-metrics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: code-scanning-metrics/
+          if-no-files-found: error
+          retention-days: 90

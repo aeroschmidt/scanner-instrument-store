@@ -8,6 +8,7 @@ import datetime as dt
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -74,7 +75,7 @@ def read_event_context() -> tuple[dict[str, str], int | None]:
         event = json.loads(Path(event_path).read_text(encoding="utf-8"))
 
     pull_request = event.get("pull_request") or event.get("workflow_run", {}).get("pull_requests", [{}])[0]
-    if event_name == "pull_request" and pull_request:
+    if event_name in {"pull_request", "pull_request_target"} and pull_request:
         pr_number = int(pull_request["number"])
         filters["pr"] = str(pr_number)
     else:
@@ -87,6 +88,37 @@ def read_event_context() -> tuple[dict[str, str], int | None]:
 def get_security_severity(alert: dict[str, Any]) -> str:
     level = (alert.get("rule") or {}).get("security_severity_level")
     return str(level or "unknown").lower()
+
+
+def is_codeql_analysis(analysis: dict[str, Any]) -> bool:
+    return str((analysis.get("tool") or {}).get("name", "")).lower() == "codeql"
+
+
+def wait_for_current_analysis(
+    analyses_url: str,
+    token: str,
+    expected_shas: set[str],
+    event_name: str,
+) -> list[dict[str, Any]]:
+    """Give GitHub-managed CodeQL time to publish the analysis for a push/PR."""
+    timeout_seconds = int(os.environ.get("CODEQL_WAIT_TIMEOUT_SECONDS", "600"))
+    interval_seconds = int(os.environ.get("CODEQL_WAIT_INTERVAL_SECONDS", "30"))
+    deadline = time.monotonic() + timeout_seconds
+    analyses: list[dict[str, Any]] = []
+
+    # A schedule creates a daily metrics snapshot, not a daily CodeQL scan.
+    if event_name == "schedule" or not expected_shas or timeout_seconds <= 0:
+        return api_get_all(analyses_url, token)
+
+    while True:
+        analyses = api_get_all(analyses_url, token)
+        if any(is_codeql_analysis(item) and item.get("commit_sha") in expected_shas for item in analyses):
+            return analyses
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return analyses
+        print(f"Waiting for GitHub-managed CodeQL analysis; {int(remaining)} seconds remain.")
+        time.sleep(min(interval_seconds, remaining))
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, Any]]) -> None:
@@ -120,7 +152,22 @@ def main() -> int:
                 dismissal_reasons[str(alert.get("dismissed_reason") or "unspecified")] += 1
 
     analyses_url = endpoint_url(api_url, repository, "code-scanning/analyses", filters)
-    analyses = api_get_all(analyses_url, token)
+    event_name = os.environ.get("GITHUB_EVENT_NAME", "unknown")
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    event: dict[str, Any] = {}
+    if event_path and Path(event_path).is_file():
+        event = json.loads(Path(event_path).read_text(encoding="utf-8"))
+    expected_shas = {os.environ.get("GITHUB_SHA", "")}
+    if pr_number:
+        pull_request = event.get("pull_request") or {}
+        for candidate_sha in (
+            (pull_request.get("head") or {}).get("sha", ""),
+            pull_request.get("merge_commit_sha", ""),
+        ):
+            if candidate_sha:
+                expected_shas.add(candidate_sha)
+    expected_shas.discard("")
+    analyses = wait_for_current_analysis(analyses_url, token, expected_shas, event_name)
     latest_by_category: dict[str, dict[str, Any]] = {}
     for analysis in analyses:
         category = str(analysis.get("category") or "uncategorized")
@@ -159,10 +206,16 @@ def main() -> int:
                 "commit_sha": analysis.get("commit_sha", ""),
                 "results_count": analysis.get("results_count", 0),
                 "rules_count": analysis.get("rules_count", 0),
+                "matched_current_execution": analysis.get("commit_sha") in expected_shas,
                 "warning": analysis.get("warning", ""),
                 "error": analysis.get("error", ""),
             }
         )
+
+    matched_current_analysis = any(
+        is_codeql_analysis(analysis) and analysis.get("commit_sha") in expected_shas
+        for analysis in analyses
+    )
 
     snapshot = {
         "schema_version": 1,
@@ -173,7 +226,6 @@ def main() -> int:
         "pull_request": pr_number,
         "commit_sha": os.environ.get("GITHUB_SHA", ""),
         "workflow_run": run_url,
-        "codeql_job_result": os.environ.get("CODEQL_JOB_RESULT", "unknown"),
         "alerts": {
             "counts_by_state": state_summary,
             "counts_by_state_and_security_severity": severity_summary,
@@ -181,6 +233,8 @@ def main() -> int:
         },
         "analysis": {
             "latest_category_count": len(analysis_rows),
+            "matched_current_execution": matched_current_analysis,
+            "expected_commit_shas": sorted(expected_shas),
             "categories": analysis_rows,
         },
         "privacy_note": "Aggregate metrics only; alert identities, locations, dismissing actors, and comments are omitted.",
@@ -205,12 +259,13 @@ def main() -> int:
     )
     write_csv(
         OUTPUT_DIR / "analysis-configurations.csv",
-        ["category", "tool", "tool_version", "created_at", "ref", "commit_sha", "results_count", "rules_count", "warning", "error"],
+        ["category", "tool", "tool_version", "created_at", "ref", "commit_sha", "results_count", "rules_count", "matched_current_execution", "warning", "error"],
         analysis_rows,
     )
 
     print(f"Wrote Code Scanning metrics to {OUTPUT_DIR.resolve()}")
-    print(f"Latest analysis categories: {len(analysis_rows)}; dismissed alerts in this snapshot: {state_summary['dismissed']}")
+    print(f"Latest analysis categories: {len(analysis_rows)}; matched current execution: {matched_current_analysis}")
+    print(f"Dismissed alerts in this snapshot: {state_summary['dismissed']}")
     print(f"Snapshot run: {run_url}")
     return 0
 
