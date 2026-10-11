@@ -139,18 +139,6 @@ def main() -> int:
     if not filters:
         raise RuntimeError("Could not determine the branch or pull request to query.")
 
-    alerts_url = endpoint_url(api_url, repository, "code-scanning/alerts", filters)
-    alert_counts: Counter[tuple[str, str]] = Counter()
-    dismissal_reasons: Counter[str] = Counter()
-    for state in ALERT_STATES:
-        state_alerts = api_get_all(f"{alerts_url}&state={urllib.parse.quote(state)}", token)
-        alert_counts[(state, "all")] = len(state_alerts)
-        for alert in state_alerts:
-            severity = get_security_severity(alert)
-            alert_counts[(state, severity)] += 1
-            if state == "dismissed":
-                dismissal_reasons[str(alert.get("dismissed_reason") or "unspecified")] += 1
-
     analyses_url = endpoint_url(api_url, repository, "code-scanning/analyses", filters)
     event_name = os.environ.get("GITHUB_EVENT_NAME", "unknown")
     event_path = os.environ.get("GITHUB_EVENT_PATH")
@@ -168,6 +156,21 @@ def main() -> int:
                 expected_shas.add(candidate_sha)
     expected_shas.discard("")
     analyses = wait_for_current_analysis(analyses_url, token, expected_shas, event_name)
+
+    # Read the alert states after waiting so PR/push snapshots include CodeQL's
+    # newly published results whenever the matching analysis becomes available.
+    alerts_url = endpoint_url(api_url, repository, "code-scanning/alerts", filters)
+    alert_counts: Counter[tuple[str, str]] = Counter()
+    dismissal_reasons: Counter[str] = Counter()
+    for state in ALERT_STATES:
+        state_alerts = api_get_all(f"{alerts_url}&state={urllib.parse.quote(state)}", token)
+        alert_counts[(state, "all")] = len(state_alerts)
+        for alert in state_alerts:
+            severity = get_security_severity(alert)
+            alert_counts[(state, severity)] += 1
+            if state == "dismissed":
+                dismissal_reasons[str(alert.get("dismissed_reason") or "unspecified")] += 1
+
     latest_by_category: dict[str, dict[str, Any]] = {}
     for analysis in analyses:
         category = str(analysis.get("category") or "uncategorized")
@@ -180,7 +183,7 @@ def main() -> int:
     run_id = os.environ.get("GITHUB_RUN_ID", "unknown")
     run_attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "1")
     run_url = f"{repository_url}/{repository}/actions/runs/{run_id}/attempts/{run_attempt}"
-    ref = os.environ.get("GITHUB_REF", "")
+    ref = f"refs/pull/{pr_number}/merge" if pr_number else os.environ.get("GITHUB_REF", "")
 
     state_summary = {
         state: alert_counts[(state, "all")] for state in ALERT_STATES
