@@ -1,12 +1,12 @@
-package br.com.exemplo.loja;
+package com.example.instrumentstore;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LojaInstrumentosApplication {
+public class InstrumentStoreApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LojaInstrumentosApplication.class, args);
+        SpringApplication.run(InstrumentStoreApplication.class, args);
     }
 }

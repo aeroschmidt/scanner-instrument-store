@@ -1,4 +1,4 @@
-package br.com.exemplo.loja;
+package com.example.instrumentstore;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;

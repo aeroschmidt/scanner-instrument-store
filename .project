@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-    <name>loja-instrumentos</name>
-    <comment>Projeto Maven de demonstração com integração SonarQube.</comment>
+    <name>instrument-store</name>
+    <comment>Sample Maven project with SonarQube integration.</comment>
     <projects/>
     <buildSpec>
         <buildCommand>

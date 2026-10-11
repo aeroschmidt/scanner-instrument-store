@@ -1,66 +1,66 @@
-# Som & Corda — loja de instrumentos
+# Sound & String — Instrument Store
 
-Aplicação de demonstração em Java 21 e Maven para aprender o ciclo de desenvolvimento, testes e análise de segurança. Tem uma página web para consultar/manter itens, API REST, banco H2 em memória e testes de integração.
+A Java 21 and Maven sample application for learning the development, testing, and security-analysis lifecycle. It includes a web page for browsing and managing products, a REST API, an in-memory H2 database, and integration tests.
 
-Pasta local: `C:\Applications\git\loja-instrumentos`.
+Local folder: `C:\Applications\git\loja-instrumentos`.
 
-## Abrir no Eclipse
+## Open in Eclipse
 
-1. No Eclipse, escolha **File > Import > Maven > Existing Maven Projects**.
-2. Selecione esta pasta (a que contém `pom.xml`) e finalize a importação.
-3. Aguarde o Maven baixar as dependências. Configure um JDK 21 em **Window > Preferences > Java > Installed JREs** se o Eclipse ainda não tiver um.
-4. Execute `LojaInstrumentosApplication` como **Java Application**.
-5. Abra `http://localhost:8080`.
+1. In Eclipse, choose **File > Import > Maven > Existing Maven Projects**.
+2. Select this folder (the one containing `pom.xml`) and finish the import.
+3. Wait for Maven to download the dependencies. Configure a JDK 21 in **Window > Preferences > Java > Installed JREs** if Eclipse does not already have one.
+4. Run `InstrumentStoreApplication` as a **Java Application**.
+5. Open `http://localhost:8080`.
 
-Também há metadados `.project` e `.classpath` para IDEs Eclipse que usem m2e; a importação Maven é a forma recomendada.
+The repository also includes `.project` and `.classpath` metadata for Eclipse IDEs with m2e; importing it as a Maven project is recommended.
 
-## Executar com Maven
+## Run with Maven
 
-É necessário JDK 21. O Maven Wrapper baixa e usa Maven 3.10.0 sem exigir que o Maven esteja instalado no PATH. Em um terminal nesta pasta:
+JDK 21 is required. The Maven Wrapper downloads and uses Maven 3.10.0, so Maven does not need to be installed on `PATH`. From a terminal in this folder:
 
 ```powershell
 .\mvnw.cmd clean verify
 .\mvnw.cmd spring-boot:run
 ```
 
-O primeiro comando compila o código e executa os testes. O segundo inicia a aplicação; acesse `http://localhost:8080`. Os dados de exemplo voltam ao estado inicial quando a aplicação reinicia porque o H2 é em memória.
+The first command compiles the code and runs the tests. The second starts the application; open `http://localhost:8080`. Sample data returns to its initial state when the application restarts because H2 runs in memory.
 
-## GitHub Actions e segurança do repositório
+## GitHub Actions and repository security
 
-### Como está funcionando
+### Current workflow
 
-O workflow `.github/workflows/build.yml` executa Maven `verify` em pushes para `main` e em pull requests destinados a `main`. O CodeQL está no **Default setup**, gerenciado pelas configurações do GitHub. O arquivo `.github/workflows/codeql.yml` não controla a análise enquanto esse modo estiver ativo; o GitHub o desabilitou manualmente ao ativar o Default setup.
+The `.github/workflows/build.yml` workflow runs Maven `verify` on pushes to `main` and on pull requests targeting `main`. CodeQL uses **Default setup**, managed in GitHub repository settings. While that mode is active, `.github/workflows/codeql.yml` does not control the analysis; GitHub disabled that file when Default setup was enabled.
 
-O GitHub Actions reage aos eventos e organiza a execução; o Maven compila e roda os testes. CodeQL analisa o código e publica os achados em **Security > Code scanning** e nos checks do pull request. A frequência da análise CodeQL é controlada pelo Default setup, não pelo cron do arquivo YAML.
+GitHub Actions responds to events and coordinates workflow runs; Maven compiles the code and runs tests. CodeQL analyzes the code and publishes findings in **Security > Code scanning** and in pull request checks. Default setup controls CodeQL's analysis schedule, not the cron in a workflow YAML file.
 
-A exportação de métricas proposta no PR #12 usa um workflow separado, `.github/workflows/code-scanning-metrics.yml`, para consultar a API do GitHub e publicar um artifact por execução com snapshots JSON/CSV. Depois que o PR for aprovado e mesclado, o workflow rodará em push na `main`, diariamente ao meio-dia de Brasília e manualmente. Para um snapshot de PR específico, a mantenedora pode executar o workflow manualmente na `main` e informar o número do PR; o workflow lê seus resultados pela API e não executa seu código. A execução manual é permitida apenas na branch padrão. O agendamento diário cria uma fotografia das métricas; não força uma nova análise CodeQL. O `GITHUB_TOKEN` recebe apenas leitura de Code Scanning, pull requests e contents, sem Personal Access Token. Os artifacts expiram em até 90 dias; snapshots contam alertas atualmente dispensados e não formam um log permanente de cada evento de dismiss.
+The metrics exporter added in PR #12 uses a separate workflow, `.github/workflows/code-scanning-metrics.yml`, to query the GitHub API and publish a JSON/CSV snapshot as an artifact for each run. The workflow runs on pushes to `main`, daily at noon in São Paulo time, and on manual dispatch. To snapshot a specific PR, the maintainer can run the workflow manually on `main` and enter its PR number; the workflow reads the results through the API and does not execute the PR's code. Manual runs are allowed only on the default branch. The daily schedule creates a metrics snapshot; it does not trigger a new CodeQL analysis. `GITHUB_TOKEN` receives read-only access to Code Scanning, pull requests, and contents; no personal access token is used. Artifacts expire after up to 90 days. Snapshots count currently dismissed alerts and are not a permanent event-by-event dismissal log.
 
-### Estado dos recursos de segurança
+### Security feature status
 
-CodeQL/Code Scanning está em **Default setup**, gerenciado pela interface do GitHub. Dependabot e Secret Protection permanecem desligados até serem testados em etapas separadas. Em repositórios públicos, a detecção de padrões de segredos para alertar provedores parceiros pode ocorrer automaticamente mesmo quando o Secret Protection e os alertas para o proprietário estão desligados; consulte a documentação oficial antes de interpretar isso como ausência absoluta de detecção.
+CodeQL/Code Scanning uses **Default setup**, managed in GitHub's interface. Dependabot and Secret Protection remain off until they are tested separately. In public repositories, secret scanning for patterns that alert partner providers may happen automatically even when Secret Protection and owner alerts are off; consult GitHub's documentation before treating that setting as proof that no detection happens.
 
-Copilot Autofix aparece ligado nas configurações, mas depende de alertas do CodeQL para sugerir correções e não substitui uma análise ativa. Não o alteramos nesta etapa.
+Copilot Autofix appears enabled in the settings, but it depends on CodeQL alerts to suggest fixes and does not replace an active analysis. It was not changed in this step.
 
-O estado observado e os procedimentos separados para administração e PRs estão nos guias da [mantenedora em Word](docs/guia-github-actions-e-seguranca.docx) e [Markdown](docs/guia-github-actions-e-seguranca.md), e de [autoria de PRs em Word](docs/guia-usuario-prs.docx) e [Markdown](docs/guia-usuario-prs.md). As capturas estão em `docs/capturas/`.
+The observed state and separate procedures for maintainers and PR authors are in the [maintainer guide in Word](docs/guia-github-actions-e-seguranca.docx) and [Markdown](docs/guia-github-actions-e-seguranca.md), and the [PR author guide in Word](docs/guia-usuario-prs.docx) and [Markdown](docs/guia-usuario-prs.md). Screenshots are in `docs/capturas/`. These guides remain in Portuguese.
 
-### Ordem acordada para os testes
+### Agreed testing sequence
 
-> **Lembrete:** testar e documentar uma ferramenta do GitHub por vez, para entender o que cada check faz.
+> **Reminder:** test and document one GitHub feature at a time to understand what each check does.
 
-Sequência de estudo:
+Study sequence:
 
-1. Entender os eventos (`push`, `pull_request` e `schedule`), jobs, etapas, logs e checks no GitHub Actions.
-2. Observar o CodeQL gerenciado e os relatórios diários de métricas em **Actions** e os achados em **Security > Code scanning**.
-3. Em etapas futuras, testar Dependabot e Secret Scanning separadamente e registrar cada resultado.
+1. Understand GitHub Actions events (`push`, `pull_request`, and `schedule`), jobs, steps, logs, and checks.
+2. Observe managed CodeQL and the daily metrics reports in **Actions**, and findings in **Security > Code scanning**.
+3. In future steps, test Dependabot and Secret Scanning separately and record each result.
 
-Este README e os guias documentam o estado e os procedimentos observados. O CircleCI não faz parte do workflow atual.
+This README and the guides describe the observed state and procedures. CircleCI is not part of the current workflow.
 
 ## API
 
-- `GET /api/products` — lista itens
-- `GET /api/products/{id}` — consulta um item
-- `POST /api/products` — cadastra item
-- `PUT /api/products/{id}` — atualiza item
-- `DELETE /api/products/{id}` — remove item
+- `GET /api/products` — list products
+- `GET /api/products/{id}` — retrieve a product
+- `POST /api/products` — create a product
+- `PUT /api/products/{id}` — update a product
+- `DELETE /api/products/{id}` — delete a product
 
-Exemplo de corpo JSON: `{"name":"Violão","category":"Cordas","price":799.90,"stock":8}`.
+Example JSON request body: `{"name":"Acoustic guitar","category":"Strings","price":799.90,"stock":8}`.

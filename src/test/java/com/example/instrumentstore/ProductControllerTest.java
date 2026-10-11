@@ -1,4 +1,4 @@
-package br.com.exemplo.loja;
+package com.example.instrumentstore;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -28,7 +28,7 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)))
-                .andExpect(jsonPath("$[0].name").value("Cabo P10 de 5 m"));
+                .andExpect(jsonPath("$[0].name").value("5 m P10 cable"));
     }
 
     @Test
@@ -42,19 +42,19 @@ class ProductControllerTest {
     @Test
     void createsUpdatesAndDeletesProduct() throws Exception {
         String product = """
-                {"name":"Baixo elétrico","category":"Cordas","price":1299.90,"stock":3}
+                {"name":"Electric bass","category":"Strings","price":1299.90,"stock":3}
                 """;
         String response = mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(product))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Baixo elétrico"))
+                .andExpect(jsonPath("$.name").value("Electric bass"))
                 .andReturn().getResponse().getContentAsString();
 
         Number generatedId = com.jayway.jsonpath.JsonPath.read(response, "$.id");
         long id = generatedId.longValue();
         String update = """
-                {"name":"Baixo elétrico 5 cordas","category":"Cordas","price":1499.90,"stock":2}
+                {"name":"5-string electric bass","category":"Strings","price":1499.90,"stock":2}
                 """;
         mockMvc.perform(put("/api/products/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,7 +71,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(""" 
-                                {"name":"Item","category":"Teste","price":20.00,"stock":-1}
+                                {"name":"Product","category":"Test","price":20.00,"stock":-1}
                                 """))
                 .andExpect(status().isBadRequest());
     }
