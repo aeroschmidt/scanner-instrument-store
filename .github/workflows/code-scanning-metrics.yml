@@ -1,0 +1,43 @@
+name: Code Scanning metrics
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 12 * * *'
+      timezone: America/Sao_Paulo
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Optional PR number to snapshot its Code Scanning results
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: read
+
+jobs:
+  export-metrics:
+    name: Export Code Scanning metrics
+    if: ${{ github.event_name != 'workflow_dispatch' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Generate JSON and CSV report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEQL_WAIT_TIMEOUT_SECONDS: 600
+          CODEQL_WAIT_INTERVAL_SECONDS: 30
+        run: python3 scripts/export_code_scanning_metrics.py
+
+      - name: Upload report snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-scanning-metrics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: code-scanning-metrics/
+          if-no-files-found: error
+          retention-days: 90
