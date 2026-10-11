@@ -13,6 +13,19 @@ O material do GitHub abaixo compara a configuração gerenciada pelo GitHub (Def
 
 O agendamento diário executa uma nova análise da branch padrão. Ele não cria commits, não sincroniza branches e não mescla pull requests.
 
+## Relatório de métricas de uma execução
+
+O workflow também gera um relatório baixável com o estado dos alertas e as análises que a API do GitHub registrou para o branch ou PR daquela execução. Para obter:
+
+1. Abra **Actions** no repositório.
+2. Entre na execução **CodeQL Advanced** relacionada ao seu push ou PR.
+3. Na página de resumo, baixe o artifact `code-scanning-metrics-...` na seção **Artifacts**.
+4. Extraia o ZIP. `alerts-summary.csv` resume alertas abertos, dispensados e corrigidos por severidade. `dismissal-reasons.csv` resume os motivos dos alertas atualmente dispensados. `analysis-configurations.csv` lista categoria, ferramenta, horário, commit, quantidade de resultados e regras executadas. `snapshot.json` reúne esses dados e o contexto da execução.
+
+Os relatórios não mostram quem dispensou alertas, comentários, caminhos de arquivos nem detalhes individuais. A contagem de dismiss representa alertas que estão dispensados naquele momento do snapshot, não o total de ações de dismiss já realizadas. Compare snapshots de execuções diferentes para acompanhar a evolução. Os arquivos expiram em até 90 dias; baixe os que precisar guardar.
+
+Uma análise CodeQL concluída não garante que não há alertas. Confira também o resultado agregado em **Security > Code scanning** e leia os detalhes do alerta antes de corrigir ou pedir revisão. Se o job de análise falhou, confira o resultado do job no snapshot e o commit/horário listado antes de usar as métricas.
+
 ## Como interpretar os resultados
 
 | Resultado | O que informa | Próximo passo |

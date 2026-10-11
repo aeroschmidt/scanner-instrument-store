@@ -33,6 +33,8 @@ O workflow `.github/workflows/build.yml` executa Maven `verify` em pushes para `
 
 O GitHub Actions reage aos eventos e organiza a execução; o Maven compila e roda os testes. CodeQL analisa o código e publica os achados em **Security > Code scanning** e nos checks do pull request. O agendamento só passa a valer depois que a alteração estiver na branch padrão; a análise não cria nem mescla alterações no código.
 
+A proposta de exportação adiciona ao workflow um artifact por execução com snapshots JSON/CSV das contagens atuais de alertas e das análises por categoria. Ela usa o `GITHUB_TOKEN` com leitura de Code Scanning, sem Personal Access Token. Após aprovação e merge, o relatório poderá ser baixado conforme os guias da [mantenedora](docs/guia-github-actions-e-seguranca.md#d-exportar-e-acompanhar-metricas-do-code-scanning) e de [PRs](docs/guia-usuario-prs.md#relatorio-de-metricas-de-uma-execucao). Os artifacts expiram em até 90 dias; snapshots são contagens por execução, não um registro permanente de eventos.
+
 ### Estado dos recursos de segurança
 
 CodeQL/Code Scanning está em **Advanced setup**, configurado pelo workflow `.github/workflows/codeql.yml`. Dependabot e Secret Protection permanecem desligados até serem testados em etapas separadas. Em repositórios públicos, a detecção de padrões de segredos para alertar provedores parceiros pode ocorrer automaticamente mesmo quando o Secret Protection e os alertas para o proprietário estão desligados; consulte a documentação oficial antes de interpretar isso como ausência absoluta de detecção.

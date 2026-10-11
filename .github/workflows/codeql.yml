@@ -102,3 +102,31 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
+
+  export-metrics:
+    name: Export Code Scanning metrics
+    needs: analyze
+    # Generate a snapshot even if an analysis job fails, so the report shows
+    # the last data currently available and the workflow still records failure.
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Generate JSON and CSV report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEQL_JOB_RESULT: ${{ needs.analyze.result }}
+        run: python3 scripts/export_code_scanning_metrics.py
+
+      - name: Upload report snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-scanning-metrics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: code-scanning-metrics/
+          if-no-files-found: error
+          retention-days: 90

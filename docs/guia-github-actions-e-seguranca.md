@@ -2,7 +2,7 @@
 
 **Projeto:** Som & Corda — loja de instrumentos  
 **Repositório:** `aeroschmidt/scanner-loja-instrumentos`  
-**Registro de estado:** 10 de outubro de 2026
+**Registro de estado:** 11 de outubro de 2026
 
 Este guia registra o que está ativo, o que ainda está desligado e como a mantenedora acompanha os testes. As ferramentas são habilitadas uma por vez.
 
@@ -15,6 +15,7 @@ Este guia registra o que está ativo, o que ainda está desligado e como a mante
 | Dependabot alerts / security updates | Off | Ainda não serão gerados alertas/PRs do Dependabot neste repositório. |
 | Dependabot version updates | Não configurado | Não há `.github/dependabot.yml`. |
 | CodeQL / Code Scanning | Advanced setup ativo | `.github/workflows/codeql.yml` analisa `main` em push/PR e executa uma varredura diária ao meio-dia de Brasília. |
+| Exportação de métricas do Code Scanning | Proposta no novo PR | Após a aprovação e o merge, cada execução publicará snapshots JSON/CSV como artifact do Actions, com contagens por estado/severidade, razões de dismiss e análises/categorias recentes. |
 | Secret Protection | Off | Settings oferece `Enable`. Em repositório público, padrões de parceiros podem continuar sendo reportados aos provedores, conforme a regra do GitHub. |
 | Copilot Autofix | On na tela | Depende de CodeQL habilitado para propor correções de alertas CodeQL; não foi alterado. |
 
@@ -74,7 +75,26 @@ O workflow analisa pushes para `main`, PRs destinados a `main` e executa uma var
 
 Para administrar: revise o YAML em `.github/workflows/codeql.yml`, acompanhe **Actions > CodeQL Advanced** e depois **Security > Code scanning**. A matriz atual analisa GitHub Actions, Java e JavaScript/TypeScript; a aplicação está em Java. Em um PR de demonstração, o job CodeQL terminou, mas o resultado agregado Code Scanning apontou uma injeção SQL de severidade alta na linha do repositório indicada pelo alerta. Um check vermelho não bloqueia merge automaticamente; isso depende das regras de proteção da branch.
 
-### D. Secret Scanning — etapa separada
+### D. Exportar e acompanhar métricas do Code Scanning
+
+O job `Export Code Scanning metrics`, em `.github/workflows/codeql.yml`, consulta a REST API do GitHub com o `GITHUB_TOKEN` temporário da própria execução. A permissão fica limitada ao necessário: `security-events: read` para consultar alertas/análises e `contents: read` para baixar o script versionado. Não é necessário criar um Personal Access Token nem cadastrar um secret.
+
+Para baixar um snapshot:
+
+1. Abra **Actions** e escolha uma execução de **CodeQL Advanced**.
+2. Na página de resumo dessa execução, localize **Artifacts**.
+3. Baixe `code-scanning-metrics-<run-id>-<tentativa>` e extraia o ZIP.
+4. Abra `snapshot.json` para os metadados/contexto, `alerts-summary.csv` para contagens por estado e severidade, `dismissal-reasons.csv` para os motivos de dismiss e `analysis-configurations.csv` para as categorias e análises registradas.
+
+O relatório inclui timestamp UTC, branch ou número do PR, commit, link e resultado dos jobs CodeQL. Por categoria, a API informa a ferramenta/versão, horário, commit, resultados e regras executadas. Isso permite ver quais linguagens/configurações reportaram análise; a API não fornece a quantidade de arquivos-fonte examinados. Uma categoria só é evidência de análise concluída se seu commit/horário corresponderem à execução observada.
+
+Os valores de `open`, `dismissed` e `fixed` são o estado atual que a API devolve para o branch ou PR consultado naquela execução. `dismissed_counts_by_reason` é uma contagem de alertas atualmente dispensados por motivo. Comparar os artifacts ao longo do tempo mostra a evolução das contagens, mas não é um log completo de eventos de dismiss: alertas podem mudar de estado entre snapshots, e a API não oferece neste relatório o histórico de cada transição.
+
+Os arquivos não incluem ator, comentário, local do alerta nem identificadores individuais. O artifact fica vinculado à execução e expira após 90 dias (limite máximo configurado para um repositório público). Para preservar histórico por mais tempo, será necessário aprovar outro destino de armazenamento. Se uma análise falhar, o job de métricas ainda tenta registrar o estado que a API disponibiliza; confira `codeql_job_result` e o commit/horário das categorias para não interpretar dados antigos como resultado da execução atual.
+
+O script `scripts/export_code_scanning_metrics.py` percorre as páginas da API, agrega os alertas sem dados pessoais, seleciona a análise mais recente por categoria e grava os arquivos mencionados. Para adaptar em outro repositório, copie o script, adicione um job após a análise, conceda somente `security-events: read` e `contents: read`, forneça `${{ github.token }}` como variável de ambiente e publique a pasta criada com `actions/upload-artifact`. Não coloque o token em linha de comando, arquivo do repositório ou log.
+
+### E. Secret Scanning — etapa separada
 
 1. Abra **Settings > Advanced Security > Secret Protection > Enable**.
 2. Leia a confirmação apresentada pelo GitHub e confira quais recursos estão incluídos para este repositório e plano.
@@ -116,9 +136,10 @@ Se um push for bloqueado por uma possível credencial, não contorne o bloqueio 
 
 1. Acompanhar o workflow Maven e o CodeQL Advanced separadamente.
 2. Observar a análise agendada diária do CodeQL.
-3. Testar Dependabot isoladamente.
-4. Testar Secret Scanning e, se autorizado, Push protection.
-5. Consolidar capturas, o que apareceu nos PRs e o que cada papel deve fazer.
+3. Baixar e comparar os snapshots de métricas do Code Scanning.
+4. Testar Dependabot isoladamente.
+5. Testar Secret Scanning e, se autorizado, Push protection.
+6. Consolidar capturas, o que apareceu nos PRs e o que cada papel deve fazer.
 
 Cada ativação é uma decisão separada da proprietária. Registre para cada sessão: data, configuração alterada, estado anterior/novo, URL da execução ou PR, resultado observado e captura da tela.
 
@@ -130,6 +151,10 @@ Cada ativação é uma decisão separada da proprietária. Registre para cada se
 - [Tipos de configuração do Code Scanning](https://docs.github.com/en/code-security/concepts/code-scanning/setup-types)
 - [Habilitar Secret Scanning](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enable-secret-scanning)
 - [Habilitar Push protection](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/prevent-future-leaks/enable-push-protection)
+- [REST API: alertas do Code Scanning](https://docs.github.com/en/rest/code-scanning/code-scanning#list-code-scanning-alerts-for-a-repository)
+- [REST API: análises do Code Scanning](https://docs.github.com/en/rest/code-scanning/code-scanning#list-code-scanning-analyses-for-a-repository)
+- [Permissões para o token do workflow](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)
+- [Retenção de artifacts do Actions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/remove-workflow-artifacts)
 - [Quickstart de segurança do GitHub](https://docs.github.com/en/code-security/getting-started/quickstart-for-securing-your-repository)
 
 ## 6. Histórico desta trilha
@@ -137,5 +162,6 @@ Cada ativação é uma decisão separada da proprietária. Registre para cada se
 - CodeQL foi habilitado por Advanced setup em `.github/workflows/codeql.yml`; a execução inicial está em [CodeQL Advanced #1](https://github.com/aeroschmidt/scanner-loja-instrumentos/actions/runs/38104871050) e a execução mais recente em [CodeQL Advanced #3](https://github.com/aeroschmidt/scanner-loja-instrumentos/actions/runs/38105323924).
 - A análise de PR executou os jobs de Actions, Java e JavaScript/TypeScript. O resultado agregado de Code Scanning aponta a vulnerabilidade de demonstração; consulte o [check do PR #10](https://github.com/aeroschmidt/scanner-loja-instrumentos/pull/10/checks?check_run_id=114369610380).
 - O cron neste documento foi ajustado para análise diária ao meio-dia de Brasília. A mudança precisa estar na branch padrão para que o evento `schedule` use o novo horário.
+- A exportação de métricas foi proposta em um PR separado após o merge do PR #11. Os artifacts passam a aparecer quando essa alteração for aprovada, mesclada e o workflow executar; cada artifact terá retenção de 90 dias.
 - Dependabot e Secret Protection permanecem desligados; cada recurso será avaliado em uma etapa separada.
 - A mantenedora revisa e aprova PRs, salvo autorização explícita e específica para uma ação diferente.
