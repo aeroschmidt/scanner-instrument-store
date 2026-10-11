@@ -15,7 +15,7 @@ Este guia registra o que está ativo, o que ainda está desligado e como a mante
 | Dependabot alerts / security updates | Off | Ainda não serão gerados alertas/PRs do Dependabot neste repositório. |
 | Dependabot version updates | Não configurado | Não há `.github/dependabot.yml`. |
 | CodeQL / Code Scanning | Default setup ativo | O GitHub gerencia a análise. O workflow YAML Advanced existente aparece como `disabled_manually`; seu cron não agenda a análise CodeQL. |
-| Exportação de métricas do Code Scanning | Proposta no PR #12 | `.github/workflows/code-scanning-metrics.yml` fará snapshots diários, em push para `main` e em PRs após o merge do workflow; consulta o Code Scanning gerenciado pela API REST. |
+| Exportação de métricas do Code Scanning | Proposta no PR #12 | `.github/workflows/code-scanning-metrics.yml` fará snapshots diários e em push para `main`; a mantenedora pode executá-lo manualmente em `main`, com número opcional de PR. |
 | Secret Protection | Off | Settings oferece `Enable`. Em repositório público, padrões de parceiros podem continuar sendo reportados aos provedores, conforme a regra do GitHub. |
 | Copilot Autofix | On na tela | Depende de CodeQL habilitado para propor correções de alertas CodeQL; não foi alterado. |
 
@@ -77,11 +77,11 @@ Para administrar: revise a configuração de CodeQL em **Settings > Advanced Sec
 
 ### D. Exportar e acompanhar métricas do Code Scanning
 
-O workflow separado `.github/workflows/code-scanning-metrics.yml` consulta a REST API do GitHub com o `GITHUB_TOKEN` temporário. Ele não ativa, substitui nem executa o CodeQL. Em push/PR, aguarda até dez minutos por uma análise CodeQL que corresponda ao commit da execução. No evento de PR usa `pull_request_target`, executa a cópia confiável do workflow da branch base, faz checkout do commit base e não executa o código proposto pelo PR. A tarefa diária de métricas apenas registra o estado atual dos alertas e os metadados da análise mais recente; não provoca uma análise CodeQL diária. O workflow de PR passa a existir na branch base depois que a mantenedora aprovar e mesclar esta alteração. A permissão fica limitada a `security-events: read` para consultar alertas/análises e `contents: read` para ler o script. Não é necessário criar um Personal Access Token nem cadastrar um secret.
+O workflow separado `.github/workflows/code-scanning-metrics.yml` consulta a REST API do GitHub com o `GITHUB_TOKEN` temporário. Ele não ativa, substitui nem executa o CodeQL. Em push para `main`, aguarda até dez minutos por uma análise CodeQL que corresponda ao commit da execução. A tarefa diária de métricas apenas registra o estado atual dos alertas e os metadados da análise mais recente; não provoca uma análise CodeQL diária. Para obter um retrato de um PR antes do merge, a mantenedora pode iniciar **Actions > Code Scanning metrics > Run workflow**, escolher a branch padrão `main` e informar o número do PR no campo opcional. O script lê os resultados do PR pela API e espera pela análise correspondente; não faz checkout do código do PR. A execução manual em branches diferentes da padrão é bloqueada. As permissões ficam limitadas a `security-events: read` para consultar alertas/análises, `pull-requests: read` para buscar metadados do PR e `contents: read` para ler o script. Não é necessário criar um Personal Access Token nem cadastrar um secret.
 
 Para baixar um snapshot:
 
-1. Depois que o workflow for mesclado, abra **Actions** e escolha uma execução de **Code Scanning metrics**.
+1. Depois que o workflow for mesclado, abra **Actions** e escolha uma execução de **Code Scanning metrics**. Para um PR específico, use **Run workflow** na branch `main` e informe o número do PR.
 2. Na página de resumo dessa execução, localize **Artifacts**.
 3. Baixe `code-scanning-metrics-<run-id>-<tentativa>` e extraia o ZIP.
 4. Abra `snapshot.json` para os metadados/contexto, `alerts-summary.csv` para contagens por estado e severidade, `dismissal-reasons.csv` para os motivos de dismiss e `analysis-configurations.csv` para as categorias e análises registradas.
@@ -92,7 +92,7 @@ Os valores de `open`, `dismissed` e `fixed` são o estado atual que a API devolv
 
 Os arquivos não incluem ator, comentário, local do alerta nem identificadores individuais. O artifact fica vinculado à execução e expira após 90 dias (limite máximo configurado para um repositório público). Para preservar histórico por mais tempo, será necessário aprovar outro destino de armazenamento. Se `matched_current_execution` for `false`, consulte o check CodeQL correspondente em **Actions**; o workflow de métricas não lê o resultado interno daquele job gerenciado.
 
-O script `scripts/export_code_scanning_metrics.py` percorre as páginas da API, agrega os alertas sem dados pessoais, aguarda a análise atual em execuções de push/PR e grava os arquivos mencionados. Para adaptar em outro repositório que usa Default setup, adicione um workflow separado, conceda somente `security-events: read` e `contents: read`, forneça `${{ github.token }}` como variável de ambiente e publique a pasta criada com `actions/upload-artifact`. Não coloque o token em linha de comando, arquivo do repositório ou log. O endpoint de análises também requer que Code Scanning esteja disponível no repositório.
+O script `scripts/export_code_scanning_metrics.py` percorre as páginas da API, agrega os alertas sem dados pessoais, aguarda a análise atual em pushes e em uma execução manual direcionada a PR, e grava os arquivos mencionados. Para adaptar em outro repositório que usa Default setup, adicione um workflow separado, conceda somente `security-events: read` e `contents: read`; inclua `pull-requests: read` se também consultar metadados de PR. Forneça `${{ github.token }}` como variável de ambiente e publique a pasta criada com `actions/upload-artifact`. Não coloque o token em linha de comando, arquivo do repositório ou log. O endpoint de análises também requer que Code Scanning esteja disponível no repositório.
 
 ### E. Secret Scanning — etapa separada
 

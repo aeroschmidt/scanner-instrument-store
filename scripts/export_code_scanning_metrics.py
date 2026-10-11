@@ -60,6 +60,32 @@ def api_get_all(url: str, token: str) -> list[dict[str, Any]]:
             raise RuntimeError("Stopped after 1000 pages to avoid an unbounded API request.")
 
 
+def api_get_object(url: str, token: str) -> dict[str, Any]:
+    """Fetch one GitHub REST resource."""
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": API_VERSION,
+            "User-Agent": "code-scanning-metrics-exporter",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"GitHub API returned HTTP {exc.code} for {urllib.parse.urlsplit(url).path}: {detail}"
+        ) from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Could not reach GitHub API: {exc.reason}") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Expected an object from GitHub API: {urllib.parse.urlsplit(url).path}")
+    return payload
+
+
 def endpoint_url(api_url: str, repository: str, suffix: str, filters: dict[str, str]) -> str:
     query = urllib.parse.urlencode(filters)
     return f"{api_url.rstrip('/')}/repos/{repository}/{suffix}?{query}"
@@ -75,9 +101,20 @@ def read_event_context() -> tuple[dict[str, str], int | None]:
         event = json.loads(Path(event_path).read_text(encoding="utf-8"))
 
     pull_request = event.get("pull_request") or event.get("workflow_run", {}).get("pull_requests", [{}])[0]
-    if event_name in {"pull_request", "pull_request_target"} and pull_request:
+    if event_name == "pull_request" and pull_request:
         pr_number = int(pull_request["number"])
         filters["pr"] = str(pr_number)
+    elif event_name == "workflow_dispatch":
+        requested_pr = str((event.get("inputs") or {}).get("pull_request_number") or "").strip()
+        if requested_pr:
+            if not requested_pr.isdecimal():
+                raise RuntimeError("pull_request_number must contain only digits.")
+            pr_number = int(requested_pr)
+            filters["pr"] = str(pr_number)
+        else:
+            ref = os.environ.get("GITHUB_REF", "")
+            if ref:
+                filters["ref"] = ref
     else:
         ref = os.environ.get("GITHUB_REF", "")
         if ref:
@@ -148,6 +185,10 @@ def main() -> int:
     expected_shas = {os.environ.get("GITHUB_SHA", "")}
     if pr_number:
         pull_request = event.get("pull_request") or {}
+        if not pull_request:
+            pull_request = api_get_object(
+                f"{api_url.rstrip('/')}/repos/{repository}/pulls/{pr_number}", token
+            )
         for candidate_sha in (
             (pull_request.get("head") or {}).get("sha", ""),
             pull_request.get("merge_commit_sha", ""),

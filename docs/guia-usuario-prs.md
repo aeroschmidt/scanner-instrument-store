@@ -11,18 +11,18 @@ O material do GitHub abaixo compara a configuração gerenciada pelo GitHub (Def
 
 ![Material do GitHub Docs comparando Default setup e Advanced setup](capturas/05-github-docs-default-advanced.png)
 
-Depois que a mantenedora aprovar e mesclar o workflow, PRs futuros para `main` também terão uma execução **Code Scanning metrics**. O workflow usa a versão confiável da branch base e não executa o código do PR para obter as métricas. Ele também gera um snapshot diário ao meio-dia de Brasília. Esse horário agenda o relatório, não uma análise CodeQL. A frequência da análise CodeQL é administrada pelo Default setup nas configurações do repositório.
+Depois que a mantenedora aprovar e mesclar o workflow, ele gerará snapshots em pushes para `main` e diariamente ao meio-dia de Brasília. Ele não executa automaticamente em cada PR. Para um PR específico, a mantenedora pode iniciar **Actions > Code Scanning metrics > Run workflow** na branch `main` e informar o número do PR; o script consulta os dados do PR pela API sem executar o código proposto. Esse horário diário agenda o relatório, não uma análise CodeQL. A frequência da análise CodeQL é administrada pelo Default setup nas configurações do repositório.
 
 ## Relatório de métricas de uma execução
 
 O workflow também gera um relatório baixável com o estado dos alertas e as análises que a API do GitHub registrou para o branch ou PR daquela execução. Para obter:
 
 1. Depois que a mantenedora aprovar e mesclar a alteração, abra **Actions** no repositório.
-2. Entre na execução **Code Scanning metrics** relacionada ao seu push ou PR.
+2. Entre na execução **Code Scanning metrics** relacionada ao push para `main`, à agenda diária ou à execução manual solicitada para o PR.
 3. Na página de resumo, baixe o artifact `code-scanning-metrics-...` na seção **Artifacts**.
 4. Extraia o ZIP. `alerts-summary.csv` resume alertas abertos, dispensados e corrigidos por severidade. `dismissal-reasons.csv` resume os motivos dos alertas atualmente dispensados. `analysis-configurations.csv` lista categoria, ferramenta, horário, commit, quantidade de resultados, regras executadas e se aquela categoria corresponde ao commit da execução. `snapshot.json` reúne esses dados e o contexto da execução, incluindo `analysis.matched_current_execution`.
 
-Os relatórios não mostram quem dispensou alertas, comentários, caminhos de arquivos nem detalhes individuais. A contagem de dismiss representa alertas que estão dispensados naquele momento do snapshot, não o total de ações de dismiss já realizadas. Compare snapshots de execuções diferentes para acompanhar a evolução. As categorias mostram as análises registradas, mas a API usada não informa quantos arquivos-fonte foram examinados. Em execuções de push/PR, a rotina aguarda até dez minutos pela análise correspondente; se `matched_current_execution` for `false`, as análises listadas são apenas as mais recentes disponíveis. O snapshot diário registra o estado atual e pode listar uma análise CodeQL anterior àquele dia. Os arquivos expiram em até 90 dias; baixe os que precisar guardar.
+Os relatórios não mostram quem dispensou alertas, comentários, caminhos de arquivos nem detalhes individuais. A contagem de dismiss representa alertas que estão dispensados naquele momento do snapshot, não o total de ações de dismiss já realizadas. Compare snapshots de execuções diferentes para acompanhar a evolução. As categorias mostram as análises registradas, mas a API usada não informa quantos arquivos-fonte foram examinados. Em execuções de push, a rotina aguarda até dez minutos pela análise correspondente; em uma execução manual de PR, usa o número informado para consultar a análise do PR. Se `matched_current_execution` for `false`, as análises listadas são apenas as mais recentes disponíveis. O snapshot diário registra o estado atual e pode listar uma análise CodeQL anterior àquele dia. Os arquivos expiram em até 90 dias; baixe os que precisar guardar.
 
 Uma análise CodeQL concluída não garante que não há alertas. Confira também o resultado agregado em **Security > Code scanning** e leia os detalhes do alerta antes de corrigir ou pedir revisão. O snapshot não contém o resultado interno do job CodeQL gerenciado; se `matched_current_execution` for `false`, confira a execução CodeQL em **Actions** e trate as categorias listadas como análises anteriores.
 
