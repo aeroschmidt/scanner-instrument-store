@@ -75,6 +75,14 @@ No Default setup, o GitHub seleciona os eventos de análise e as linguagens na c
 
 Para administrar: revise a configuração de CodeQL em **Settings > Advanced Security > Code scanning**; acompanhe as execuções gerenciadas em **Actions** e os alertas em **Security > Code scanning**. O histórico do repositório mostra uma vulnerabilidade demonstrativa de SQL Injection High com arquivo e linha. Um check vermelho não bloqueia merge automaticamente; isso depende das regras de proteção da branch.
 
+
+#### Por que o CodeQL pode não aparecer como comentário na Conversation
+
+A aba **Checks** e a linha do tempo **Conversation** mostram coisas diferentes. Uma execução CodeQL pode terminar e aparecer em **Checks** sem publicar um comentário na Conversation. Quando não há alertas novos no código alterado pelo PR, o resumo do check pode dizer *“No new alerts in code changed by this pull request”* e não ter anotações. Isso significa que aquela análise não encontrou alertas novos nas mudanças do PR; não significa que o CodeQL esteja desligado nem que o repositório inteiro esteja sem alertas.
+
+Para confirmar uma execução, abra **Checks > CodeQL** no PR e leia o resumo. Para consultar alertas existentes na branch, use **Security > Code scanning**. Se houver alertas relacionados às alterações do PR, abra a anotação e confira arquivo, linha e regra. A ausência de comentário na Conversation, isoladamente, não confirma falha da análise.
+
+No PR [Restore visual Code Scanning guide for PR contributors](https://github.com/aeroschmidt/scanner-instrument-store/pull/16/checks?check_run_id=114984058749), o CodeQL terminou com sucesso e registrou *“No new alerts in code changed by this pull request”*. Esse PR altera documentação e imagens, não código-fonte da aplicação; por isso não houve alerta novo nem anotação de código nesse check. O resultado pode ser consultado na execução [CodeQL do PR](https://github.com/aeroschmidt/scanner-instrument-store/runs/114984058749).
 ### D. Exportar e acompanhar métricas do Code Scanning
 
 O workflow separado `.github/workflows/code-scanning-metrics.yml` consulta a REST API do GitHub com o `GITHUB_TOKEN` temporário. Ele não ativa, substitui nem executa o CodeQL. Em push para `main`, aguarda até dez minutos por uma análise CodeQL que corresponda ao commit da execução. A tarefa diária de métricas apenas registra o estado atual dos alertas e os metadados da análise mais recente; não provoca uma análise CodeQL diária. Para obter um retrato de um PR antes do merge, a mantenedora pode iniciar **Actions > Code Scanning metrics > Run workflow**, escolher a branch padrão `main` e informar o número do PR no campo opcional. O script lê os resultados do PR pela API e espera pela análise correspondente; não faz checkout do código do PR. A execução manual em branches diferentes da padrão é bloqueada. As permissões ficam limitadas a `security-events: read` para consultar alertas/análises, `pull-requests: read` para buscar metadados do PR e `contents: read` para ler o script. Não é necessário criar um Personal Access Token nem cadastrar um secret.
@@ -166,3 +174,5 @@ Cada ativação é uma decisão separada da proprietária. Registre para cada se
 - A exportação de métricas está sendo preparada no [PR #12](https://github.com/aeroschmidt/scanner-loja-instrumentos/pull/12) como workflow separado para manter o Default setup. Os artifacts só aparecem após aprovação, merge e execução; cada artifact terá retenção de até 90 dias.
 - Dependabot e Secret Protection permanecem desligados; cada recurso será avaliado em uma etapa separada.
 - A mantenedora revisa e aprova PRs, salvo autorização explícita e específica para uma ação diferente.
+
+
