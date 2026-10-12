@@ -9,7 +9,7 @@ async function request(url, options) {
     const response = await fetch(url, options);
     if (!response.ok) {
         const detail = await response.text();
-        throw new Error(detail || `Falha na solicitação (${response.status})`);
+        throw new Error(detail || `Request failed (${response.status})`);
     }
     return response.status === 204 ? null : response.json();
 }
@@ -23,7 +23,7 @@ function renderProducts(products) {
     grid.replaceChildren();
     if (products.length === 0) {
         const empty = document.createElement('p');
-        empty.textContent = 'Ainda não há itens cadastrados. Adicione o primeiro instrumento.';
+        empty.textContent = 'No products have been added yet. Add the first instrument.';
         grid.append(empty);
         return;
     }
@@ -47,22 +47,22 @@ function renderProducts(products) {
         bottom.className = 'card-bottom';
         const price = document.createElement('span');
         price.className = 'price';
-        price.textContent = Number(product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        price.textContent = Number(product.price).toLocaleString('en-US', { style: 'currency', currency: 'BRL' });
         const stock = document.createElement('span');
         stock.className = 'stock';
-        stock.textContent = `${product.stock} un.`;
+        stock.textContent = `${product.stock} units`;
         bottom.append(price, stock);
         const actions = document.createElement('div');
         actions.className = 'card-actions';
         const edit = document.createElement('button');
         edit.className = 'text-button';
         edit.type = 'button';
-        edit.textContent = 'Editar';
+        edit.textContent = 'Edit';
         edit.addEventListener('click', () => openEditor(product));
         const remove = document.createElement('button');
         remove.className = 'text-button delete';
         remove.type = 'button';
-        remove.textContent = 'Remover';
+        remove.textContent = 'Remove';
         remove.addEventListener('click', () => removeProduct(product.id));
         actions.append(edit, remove);
         content.append(category, name, bottom, actions);
@@ -76,13 +76,13 @@ async function loadProducts() {
         renderProducts(await request(api));
         showStatus('');
     } catch (error) {
-        showStatus(`Não foi possível carregar o catálogo: ${error.message}`, true);
+        showStatus(`Could not load the catalog: ${error.message}`, true);
     }
 }
 
 function openEditor(product) {
     form.reset();
-    document.querySelector('#dialog-title').textContent = product ? 'Editar instrumento' : 'Novo instrumento';
+    document.querySelector('#dialog-title').textContent = product ? 'Edit instrument' : 'New instrument';
     document.querySelector('#product-id').value = product?.id ?? '';
     document.querySelector('#name').value = product?.name ?? '';
     document.querySelector('#category').value = product?.category ?? '';
@@ -92,13 +92,13 @@ function openEditor(product) {
 }
 
 async function removeProduct(id) {
-    if (!window.confirm('Remover este item do catálogo?')) return;
+    if (!window.confirm('Remove this product from the catalog?')) return;
     try {
         await request(`${api}/${id}`, { method: 'DELETE' });
-        showStatus('Item removido.');
+        showStatus('Product removed.');
         await loadProducts();
     } catch (error) {
-        showStatus(`Não foi possível remover o item: ${error.message}`, true);
+        showStatus(`Could not remove the product: ${error.message}`, true);
     }
 }
 
@@ -119,10 +119,10 @@ form.addEventListener('submit', async (event) => {
             body: JSON.stringify(payload)
         });
         dialog.close();
-        showStatus(id ? 'Item atualizado.' : 'Item adicionado.');
+        showStatus(id ? 'Product updated.' : 'Product added.');
         await loadProducts();
     } catch (error) {
-        showStatus(`Não foi possível salvar o item: ${error.message}`, true);
+        showStatus(`Could not save the product: ${error.message}`, true);
     }
 });
 

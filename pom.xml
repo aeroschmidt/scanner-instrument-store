@@ -9,17 +9,17 @@
         <relativePath/>
     </parent>
 
-    <groupId>br.com.exemplo</groupId>
-    <artifactId>loja-instrumentos</artifactId>
+    <groupId>com.example</groupId>
+    <artifactId>instrument-store</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Loja de Instrumentos</name>
-    <description>Catálogo e controle de estoque para uma loja de instrumentos musicais.</description>
+    <name>Instrument Store</name>
+    <description>Catalog and inventory management for a musical instrument store.</description>
 
     <properties>
         <java.version>21</java.version>
         <sonar.projectKey>aeroschmidt_scanner-loja-instrumentos</sonar.projectKey>
         <sonar.organization>aeroschmidt</sonar.organization>
-        <sonar.projectName>Loja de Instrumentos Musicais</sonar.projectName>
+        <sonar.projectName>Musical Instrument Store</sonar.projectName>
         <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
     </properties>
 

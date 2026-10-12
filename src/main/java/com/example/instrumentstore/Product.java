@@ -1,4 +1,4 @@
-package br.com.exemplo.loja;
+package com.example.instrumentstore;
 
 import java.math.BigDecimal;
 
