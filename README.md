@@ -41,7 +41,7 @@ CodeQL/Code Scanning uses **Default setup**, managed in GitHub's interface. Depe
 
 Copilot Autofix appears enabled in the settings, but it depends on CodeQL alerts to suggest fixes and does not replace an active analysis. It was not changed in this step.
 
-The observed state and separate procedures for maintainers and PR authors are in the [maintainer guide in Word](docs/guia-github-actions-e-seguranca.docx) and [Markdown](docs/guia-github-actions-e-seguranca.md), and the [PR author guide in Word](docs/guia-usuario-prs.docx) and [Markdown](docs/guia-usuario-prs.md). Screenshots are in `docs/capturas/`. These guides remain in Portuguese.
+The observed state and separate procedures for maintainers and PR authors are in the [maintainer guide in Word](docs/guia-github-actions-e-seguranca.docx) and [Markdown](docs/guia-github-actions-e-seguranca.md), and the [PR author guide in Word](docs/guia-usuario-prs.docx) and [Markdown](docs/guia-usuario-prs.md). Screenshots are in `docs/capturas/`. These guides remain in Portuguese. The focused [Code Scanning guide for PR authors and reviewers](docs/guia-usuario-code-scanning.md) is available in Portuguese.
 
 ### Agreed testing sequence
 
