@@ -10,6 +10,30 @@ Code Scanning analisa o código-fonte em busca de padrões de falha e vulnerabil
 
 O alerta é uma indicação para revisão. Leia os detalhes no contexto do código antes de decidir. Um resultado sem alertas significa que a análise executada não relatou um achado reconhecido; não prova que todo o código está seguro.
 
+## Exemplo visual: PR, vulnerabilidade e correção
+
+As capturas desta sequência vêm do exercício isolado **Introduction to CodeQL**. Elas registram uma alteração em Python feita no projeto de treinamento. O guia reaproveita somente as imagens e a explicação: nenhum arquivo de aplicação vulnerável, workflow ou alerta foi movido para o projeto da loja. Trate os nomes, linhas e estados como evidência histórica do exercício.
+
+### Abertura do PR e detecção
+
+A primeira captura mostra o PR de treinamento aberto, com o check do CodeQL e o alerta High visíveis. Em **Files changed**, o diff compara a consulta parametrizada que existia antes com a concatenação insegura introduzida no exercício. A anotação do CodeQL aponta o trecho e também mostra uma sugestão de correção parametrizada.
+
+![PR de treinamento aberto: checks do CodeQL e alerta High](capturas/code-scanning-pr-open.png)
+
+![Diff antes/depois: consulta parametrizada substituída por concatenação; CodeQL mostra a sugestão segura](codeql-learning-materials/.github/images/code-scan-results.png)
+
+A lista de **Code scanning** permite localizar o alerta; ao abri-lo, a página mostra a regra, a severidade e o arquivo/linha. A tela seguinte é a evidência do alerta já localizado no código do exercício.
+
+![Lista Code Scanning do exercício de treinamento](capturas/code-scanning-alert-list-example.png)
+
+![Detalhe do alerta CodeQL no exercício de treinamento](capturas/code-scanning-alert-detail-example.png)
+
+### Depois da correção
+
+Após restaurar a consulta parametrizada no exercício, a timeline do alerta registra que ele foi corrigido. **Fixed** significa que uma nova análise confirmou que o problema não está mais presente; isso é diferente de **Dismiss**, que registra uma decisão de não corrigir o alerta.
+
+![Timeline do alerta depois da correção do código](codeql-learning-materials/.github/images/audit-trail-fixed-alert.png)
+
 ## 2. Onde o resultado aparece
 
 ### No Pull Request
