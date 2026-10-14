@@ -46,6 +46,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Intentional Dependabot exercise: JUnit 4.12 has moderate CVE-2020-15250.
+             Test scope keeps this demonstration dependency out of the application runtime. Remove after the exercise. -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
