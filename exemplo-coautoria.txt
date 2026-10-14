@@ -1,0 +1,7 @@
+DEMONSTRAÇÃO DE COAUTORIA
+
+Este arquivo é apenas material de aprendizagem e não altera o funcionamento da aplicação.
+
+Uma coautoria real é registrada na mensagem de um commit com uma linha Co-authored-by: Nome <email associado à conta GitHub>. A pessoa indicada precisa ter contribuído de verdade e concordar com a atribuição. O commit deve ser enviado ao GitHub e fazer parte de um Pull Request mesclado para poder contar para o Pair Extraordinaire.
+
+Este commit de demonstração ainda não inclui outra pessoa como coautora. A atribuição só deve ser adicionada depois da participação real da colaboradora.
