@@ -9,7 +9,7 @@ No repositório, abra **Security** (em algumas interfaces, **Security and qualit
 - pacote e arquivo de dependências envolvidos;
 - severidade e versões afetadas;
 - versão corrigida, quando disponível;
-- caminho da dependência — direta ou transitiva;
+- caminho da dependência — direta ou trazida por outra dependência;
 - Pull Request de correção, se o Dependabot já tiver criado um.
 
 Se a opção não aparecer ou você não puder abrir o alerta, peça à pessoa mantenedora para confirmar a configuração e seu acesso. A ausência de alertas não prova que todas as dependências estão livres de problemas: o GitHub depende dos arquivos de dependência reconhecidos e dos avisos disponíveis na base de advisories.
@@ -31,8 +31,8 @@ Esses recursos são separados. O Dependabot pode propor uma atualização, mas o
 ## Como agir
 
 1. Abra os detalhes do alerta e confira pacote, severidade, versões afetadas e arquivo indicado.
-2. Verifique se há uma versão corrigida e se a dependência é usada diretamente ou chega por outra dependência.
-3. Se houver um PR do Dependabot, revise os arquivos alterados e a versão proposta. Confira os checks do GitHub Actions e os testes do projeto; avalie compatibilidade antes da aprovação.
+2. Verifique se há uma versão corrigida e se a dependência está declarada diretamente ou vem por meio de outra biblioteca.
+3. Se houver um PR do Dependabot, revise os arquivos alterados e a versão proposta. Confira as verificações de compilação e testes do GitHub Actions; avalie compatibilidade antes da aprovação.
 4. Se não houver PR, se os testes falharem ou se o impacto não estiver claro, peça orientação à pessoa mantenedora. Conforme o processo da equipe, ela pode preparar uma atualização manual ou investigar a dependência.
 5. Prefira corrigir a dependência. Use **Dismiss** somente após analisar o alerta e confirmar, com a mantenedora, que não é necessária uma correção; registre o motivo de acordo com o processo do repositório.
 
