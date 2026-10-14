@@ -45,7 +45,7 @@ Dependency Review examina mudanças de dependências incluídas ou atualizadas p
 
 <code>Required</code> quer dizer que a regra de proteção espera um check com esse nome. Não garante que a análise foi executada.
 
-Neste repositório, o job **Dependency Review** continua em <code>.github/workflows/dependency-review.yml</code>, mas sua condição faz o job não rodar: <code>if: \${{ false }}</code>. Assim o GitHub Actions o mostra como <code>skipped</code>. A documentação do GitHub explica que um job pulado por condição reporta sucesso e não impede o merge, mesmo quando é obrigatório. Portanto, <code>skipped</code> não significa “analisado e aprovado”.
+Neste repositório, o job **Dependency Review** continua em <code>.github/workflows/dependency-review.yml</code>, mas sua condição faz o job não rodar: <code>a condição configurada avalia para falso</code>. Assim o GitHub Actions o mostra como <code>skipped</code>. A documentação do GitHub explica que um job pulado por condição reporta sucesso e não impede o merge, mesmo quando é obrigatório. Portanto, <code>skipped</code> não significa “analisado e aprovado”.
 
 Isso é diferente de filtros de branch, caminho ou mensagem que impedem o workflow inteiro de iniciar; nesses casos, os checks podem ficar pendentes e bloquear o merge. Veja [Troubleshooting required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks).
 
