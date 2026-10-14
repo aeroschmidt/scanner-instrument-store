@@ -54,13 +54,22 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- Intentional Dependabot security-updates test: commons-compress 1.25.0 is affected by
+        <!-- Intentional Dependabot security-updates test: commons-compress 1.26.0 is affected by
              moderate CVE-2024-25710 and CVE-2024-26308. Version 1.26.0 fixes both.
              Test scope keeps it out of application runtime; remove after the exercise. -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.26.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Intentional Dependabot security-updates test: commons-lang3 3.17.0 is affected by
+             moderate CVE-2025-48924; version 3.18.0 fixes it.
+             Test scope keeps this demonstration dependency out of application runtime. Remove after the exercise. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.17.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
