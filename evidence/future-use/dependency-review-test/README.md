@@ -14,7 +14,13 @@ This folder preserves evidence from a controlled test of the repository's requir
 
 The pull request intentionally adds `org.apache.commons:commons-configuration2:2.14.0` in test scope. The required Dependency Review check failed after detecting one moderate-severity vulnerable package. The Maven build and test check passed, and CodeQL completed with no new alerts in code changed by this pull request.
 
-The screenshot `dependency-review-required-check-failed.png` records the pull request state and check summary. The screenshot `dependency-review-run-summary.png` records the failing check in the Actions run.
+### Pull request and check status
+
+![Open test pull request with the required Dependency Review check failing](codex-clipboard-c8bbbaa8-395e-4e89-b36e-2a8c4c29f867.png)
+
+### Merge status panel
+
+![Merge status showing Dependency Review as a required failing check](codex-clipboard-bed45bf1-000d-4e24-86cf-57411fc3703f.png)
 
 ## Scope and handling
 
