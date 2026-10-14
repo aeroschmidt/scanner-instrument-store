@@ -30,6 +30,8 @@ O alerta informa sobre um risco; não abre PR nem bloqueia merge por si só.
 
 Com **Dependabot security updates** habilitado, o Dependabot pode abrir um PR quando há alerta e atualização corrigida aplicável. Não é necessariamente um PR por alerta: pode não haver correção, a atualização pode não ser compatível, ou atualizações podem ser agrupadas. O Dependabot automatiza atualizações, mas não substitui a revisão humana do PR.
 
+No teste com Commons Compress, havia duas vulnerabilidades no mesmo pacote, corrigidas pela versão 1.26.0. O Dependabot abriu automaticamente um único PR que atualiza o pacote de 1.25.0 para 1.26.0 e cobre as duas vulnerabilidades. Na tela do alerta, **Review security update** abre o PR que já existe; não dispara uma análise nem cria um segundo PR. O GitHub explica esse fluxo no [Dependabot quickstart](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/dependabot-quickstart) e em [Dependabot pull requests](https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/supply-chain-security/dependabot-pull-requests).
+
 O arquivo opcional [<code>dependabot.yml</code>](https://docs.github.com/en/code-security/concepts/supply-chain-security/about-the-dependabot-yml-file) permite personalizar principalmente agendamento e comportamento das atualizações. Security updates podem ser habilitados pelas configurações do GitHub sem esse arquivo.
 
 ## Dependency Review: o que entra no PR
