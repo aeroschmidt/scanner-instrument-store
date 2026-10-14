@@ -19,6 +19,10 @@ Um check verde significa que aquela verificação terminou com sucesso. Isso nã
 4. Se um check falhar, abra o detalhe do job, localize a etapa marcada como falha e leia o log a partir da primeira mensagem de erro relevante. Corrija a causa e envie uma nova alteração para o mesmo PR.
 5. Revise o diff em **Files changed** e responda aos comentários. A aprovação e o merge seguem as regras da equipe.
 
+### Coautoria registrada no commit
+
+Quando outra pessoa contribuir de verdade para uma alteração, a coautoria pode ser registrada na mensagem do commit com uma linha `Co-authored-by: Nome <email associado à conta GitHub>`. A branch pode ter qualquer nome; o que importa para o reconhecimento é o commit com a coautoria registrada, incluído em um Pull Request mesclado. Não atribua coautoria a quem não participou. Consulte as [instruções oficiais para commits com múltiplos autores](https://docs.github.com/en/pull-requests/how-tos/commit-changes/creating-a-commit-with-multiple-authors).
+
 ### Como ler o estado de um check
 
 - **Em execução:** o workflow ainda está trabalhando. Aguarde o resultado.
