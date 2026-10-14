@@ -9,7 +9,7 @@ No repositório, abra **Security** (em algumas interfaces, **Security and qualit
 - pacote e arquivo de dependências envolvidos;
 - severidade e versões afetadas;
 - versão corrigida, quando disponível;
-- caminho da dependência — direta ou trazida por outra dependência;
+- caminho da dependência — direta ou trazida por outra biblioteca;
 - Pull Request de correção, se o Dependabot já tiver criado um.
 
 Se a opção não aparecer ou você não puder abrir o alerta, peça à pessoa mantenedora para confirmar a configuração e seu acesso. A ausência de alertas não prova que todas as dependências estão livres de problemas: o GitHub depende dos arquivos de dependência reconhecidos e dos avisos disponíveis na base de advisories.
@@ -34,9 +34,25 @@ Esses recursos são separados. O Dependabot pode propor uma atualização, mas o
 2. Verifique se há uma versão corrigida e se a dependência está declarada diretamente ou vem por meio de outra biblioteca.
 3. Se houver um PR do Dependabot, revise os arquivos alterados e a versão proposta. Confira as verificações de compilação e testes do GitHub Actions; avalie compatibilidade antes da aprovação.
 4. Se não houver PR, se os testes falharem ou se o impacto não estiver claro, peça orientação à pessoa mantenedora. Conforme o processo da equipe, ela pode preparar uma atualização manual ou investigar a dependência.
-5. Prefira corrigir a dependência. Use **Dismiss** somente após analisar o alerta e confirmar, com a mantenedora, que não é necessária uma correção; registre o motivo de acordo com o processo do repositório.
+5. Prefira corrigir a dependência. Use **Dismiss** somente após analisar o alerta e confirmar, com a mantenedora, que não é necessária uma correção.
 
-Pessoas contribuidoras normalmente não administram as configurações organizacionais do Dependabot. Elas podem consultar os alertas e colaborar na correção; a mantenedora controla quais recursos estão habilitados e como as atualizações automáticas são propostas.
+## Dismiss: registre a decisão com clareza
+
+Abra **Dismiss alert** e selecione o motivo que corresponde à análise:
+
+- **A fix has already been started** — a correção está realmente em andamento.
+- **No bandwidth to fix this** — a equipe não tem capacidade agora; registre o acompanhamento e a reavaliação.
+- **Risk is tolerable to this project** — a equipe avaliou o risco e decidiu aceitá-lo, com evidências e controles descritos.
+- **This alert is inaccurate or incorrect** — há evidência de que o alerta não se aplica ou está incorreto.
+- **Vulnerable code is not actually used** — confirme que o componente vulnerável não é usado pelo projeto. Ter a dependência listada no grafo, por si só, não prova que esse motivo é adequado.
+
+O GitHub exige a seleção de um motivo. O campo **Dismissal comment** é opcional na interface e aceita até 280 caracteres. Como prática de governança recomendada, registre também um comentário explicando a decisão e peça revisão da pessoa mantenedora antes de concluir o Dismiss. O comentário documenta a justificativa; ele não corrige a dependência.
+
+Modelo conciso para o comentário:
+
+> Análise: [evidência e por que não corrigir]. Revisado por: [nome], [data]. Decisão: [temporária/permanente]. Mitigação: [controle]. Acompanhamento: [ticket, responsável e prazo se aplicável].
+
+Se não for possível concluir a triagem, não escolha um motivo só para fechar o alerta: peça ajuda à pessoa mantenedora. Alertas descartados podem ser reabertos; consulte **Closed** e a timeline se precisar rever uma decisão. [Veja a tela do alerta de exemplo](https://github.com/schmidt-security-lab/scanner-instrument-store/security/dependabot/1).
 
 ## Documentação oficial
 
