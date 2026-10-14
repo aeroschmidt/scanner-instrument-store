@@ -54,6 +54,14 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <!-- Intentional Dependency Review exercise: commons-configuration2 2.14.0 is affected by moderate CVE-2026-45205.
+             Test scope keeps this demonstration dependency out of the application runtime. Do not merge; remove after validation. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.14.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
