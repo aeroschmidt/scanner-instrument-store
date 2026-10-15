@@ -72,6 +72,17 @@ Code Scanning/CodeQL analisa código-fonte; Secret Scanning procura credenciais 
 
 Nas telas vistas no estudo, Secret Scanning aparecia desabilitado em uma configuração avançada, enquanto a tela de configuração global mostrava Push Protection com padrões habilitados. Isso não comprova que os alertas de Secret Scanning estejam habilitados naquele repositório: escopo e origem da configuração importam. O GitHub também documenta proteção de push para usuários em alguns contextos públicos. Consulte a documentação de [Push Protection](https://docs.github.com/en/code-security/concepts/secret-security/push-protection) para interpretar o estado aplicável.
 
+## Referência para a próxima documentação de Secret Scanning
+
+A captura fornecida pela usuária mostra o fluxo de habilitação de **Secret Protection** e **Push protection** para um repositório privado, além da configuração de segurança da organização:
+
+- Em configurações do repositório, **Settings > Security > Advanced Security**, habilitar **Secret Protection** e depois **Push protection**.
+- Se aparecer **Disable** ao lado de Secret Protection, a captura indica que a função já está habilitada, possivelmente herdada da organização.
+- A configuração de Secret Protection da organização pode habilitar o recurso por padrão nos repositórios privados onde GitHub Advanced Security está habilitado.
+- Secret Protection e Push protection são controles relacionados, mas separados: um habilita detecção/alertas de segredos; o outro pode bloquear o push de segredos compatíveis.
+
+Referência visual salva em `referencias/secret-scanning/configuracao-organizacao-repositorio-privado.png` no workspace desta tarefa. Validar os nomes e caminhos atuais da interface antes de reutilizar em material para usuários.
+
 ## Configurações de segurança e regras de merge
 
 Uma configuração avançada controla recursos habilitados para os repositórios aos quais foi aplicada. Dependency graph, Dependabot alerts e Security updates são controles distintos. “Enabled” indica que a função está habilitada naquele escopo; não garante que exista vulnerabilidade, correção ou PR naquele momento.
