@@ -76,7 +76,11 @@ Nas telas vistas no estudo, Secret Scanning aparecia desabilitado em uma configu
 
 Uma configuração avançada controla recursos habilitados para os repositórios aos quais foi aplicada. Dependency graph, Dependabot alerts e Security updates são controles distintos. “Enabled” indica que a função está habilitada naquele escopo; não garante que exista vulnerabilidade, correção ou PR naquele momento.
 
+Na configuração da organização, <code>Not set</code> significa que ela não impõe um estado para o recurso; o valor já definido no repositório continua valendo. Isso não desliga Security updates. Para desabilitar, é preciso conferir o estado efetivo nas configurações do repositório ou aplicar <code>Disabled</code> pela configuração da organização.
+
 Rulesets e proteção de branch definem condições de merge, como checks obrigatórios. São separados de habilitar grafo, alertas e atualizações. Uma regra que exige um job sempre pulado não proporciona a revisão indicada pelo nome.
+
+Um ruleset pode ser criado no nível da organização e direcionado a todos ou a repositórios selecionados, desde que o plano da organização permita rulesets organizacionais (GitHub Team ou Enterprise). Nele, é possível exigir um check como **Dependency Review**. No plano Free desta organização, essa opção organizacional não está disponível para aplicação; use a proteção de branch ou ruleset do próprio repositório público.
 
 ## Exemplo usado nos testes
 
@@ -89,11 +93,19 @@ O PR de teste foi mesclado à <code>main</code> para permitir observar o comport
 
 Na mesma validação, Dependency Review apareceu como <code>skipped</code> porque o job estava condicionalmente desativado. A leitura atual do ruleset mostrou que ele ainda espera esse nome como check obrigatório; isso não significa que o job tenha analisado o PR.
 
+## Exemplo combinado de Code Scanning e Dependabot
+
+No PR de demonstração aberto nesta branch, o CodeQL identificou um novo alerta de alta severidade de SQL injection no exemplo Java isolado em teste. O build do Maven passou. Isso confirma que o Code Scanning analisa o código alterado no PR, mesmo quando o exemplo não está conectado a uma rota da aplicação.
+
+O mesmo PR adiciona `org.apache.commons:commons-configuration2` versão `2.14.0`, em escopo `test`, associada ao advisory moderado [GHSA-337m-mw94-2v6g](https://github.com/advisories/GHSA-337m-mw94-2v6g); a versão corrigida indicada é `2.15.0`. O check **Dependency Review** apareceu como `skipped`, pois o job está temporariamente condicionado para não executar. Portanto, ele não avaliou a mudança de dependência neste PR.
+
+A distinção prática: **Dependabot alerts** registra vulnerabilidades encontradas no grafo do repositório; **Dependency Review** é o check que avalia a alteração de dependência dentro do PR. Com o workflow de Dependency Review pulado, não se deve esperar que esse check valide a dependência. Não mescle uma dependência vulnerável à branch principal apenas para testar sem decidir conscientemente: ao chegar à branch padrão, pode surgir um alerta do Dependabot e, dependendo da configuração efetiva no repositório, uma atualização automática.
+
 ## Estado observado durante esta compilação
 
 Este retrato pode mudar e não substitui as configurações atuais:
 
-- Na configuração de segurança da organização relatada na conversa, Dependency graph, Dependabot alerts e Security updates apareciam habilitados. Automatic dependency submission, restrição a dismiss direto e Malware alerts estavam como <code>Not set</code>.
+- Na configuração de segurança da organização, Dependency graph e Dependabot alerts foram vistos como habilitados. Security updates foi depois informado como <code>Not set</code>; nesse estado, a organização não altera o valor que já está definido no repositório. Automatic dependency submission, restrição a dismiss direto e Malware alerts estavam como <code>Not set</code>.
 - CodeQL/Code Scanning está em **Default setup**, conforme o README do projeto.
 - A leitura atual identificou um ruleset **do repositório**, ativo para a branch padrão e com <code>Dependency Review</code> como check obrigatório. Isso é diferente de uma configuração de segurança da organização.
 - O workflow Dependency Review está temporariamente pulado pela condição descrita acima.
