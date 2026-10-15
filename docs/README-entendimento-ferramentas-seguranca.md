@@ -83,6 +83,10 @@ A captura fornecida pela usuária mostra o fluxo de habilitação de **Secret Pr
 
 A captura original foi salva no workspace desta tarefa para reutilização na próxima documentação visual. Validar os nomes e caminhos atuais da interface antes de reutilizar em material para usuários.
 
+### Resultado do teste de Push Protection
+
+Foi tentada a criação de um arquivo numa branch temporária usando o valor fictício de treinamento publicado na documentação oficial do GitHub. O GitHub rejeitou a operação da API com a indicação **Secret detected**, antes de criar o commit. O segredo de teste não foi gravado no repositório. Isso confirma que a proteção por push está ativa para esse padrão no repositório de teste.
+
 ## Configurações de segurança e regras de merge
 
 Uma configuração avançada controla recursos habilitados para os repositórios aos quais foi aplicada. Dependency graph, Dependabot alerts e Security updates são controles distintos. “Enabled” indica que a função está habilitada naquele escopo; não garante que exista vulnerabilidade, correção ou PR naquele momento.
