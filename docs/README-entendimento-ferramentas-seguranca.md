@@ -81,7 +81,7 @@ A captura fornecida pela usuária mostra o fluxo de habilitação de **Secret Pr
 - A configuração de Secret Protection da organização pode habilitar o recurso por padrão nos repositórios privados onde GitHub Advanced Security está habilitado.
 - Secret Protection e Push protection são controles relacionados, mas separados: um habilita detecção/alertas de segredos; o outro pode bloquear o push de segredos compatíveis.
 
-Referência visual salva em `referencias/secret-scanning/configuracao-organizacao-repositorio-privado.png` no workspace desta tarefa. Validar os nomes e caminhos atuais da interface antes de reutilizar em material para usuários.
+A captura original foi salva no workspace desta tarefa para reutilização na próxima documentação visual. Validar os nomes e caminhos atuais da interface antes de reutilizar em material para usuários.
 
 ## Configurações de segurança e regras de merge
 
