@@ -80,6 +80,8 @@ Na configuração da organização, <code>Not set</code> significa que ela não 
 
 Rulesets e proteção de branch definem condições de merge, como checks obrigatórios. São separados de habilitar grafo, alertas e atualizações. Uma regra que exige um job sempre pulado não proporciona a revisão indicada pelo nome.
 
+Um ruleset pode ser criado no nível da organização e direcionado a todos ou a repositórios selecionados, desde que o plano da organização permita rulesets organizacionais (GitHub Team ou Enterprise). Nele, é possível exigir um check como **Dependency Review**. No plano Free desta organização, essa opção organizacional não está disponível para aplicação; use a proteção de branch ou ruleset do próprio repositório público.
+
 ## Exemplo usado nos testes
 
 Em outubro de 2026, um PR de teste adicionou <code>org.apache.commons:commons-compress</code> versão <code>1.25.0</code> com escopo Maven <code>test</code>. O GitHub Advisory Database associa a versão a duas vulnerabilidades moderadas; a versão corrigida indicada é <code>1.26.0</code>:
