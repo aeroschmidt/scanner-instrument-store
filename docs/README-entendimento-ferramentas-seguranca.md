@@ -76,6 +76,8 @@ Nas telas vistas no estudo, Secret Scanning aparecia desabilitado em uma configu
 
 Uma configuração avançada controla recursos habilitados para os repositórios aos quais foi aplicada. Dependency graph, Dependabot alerts e Security updates são controles distintos. “Enabled” indica que a função está habilitada naquele escopo; não garante que exista vulnerabilidade, correção ou PR naquele momento.
 
+Na configuração da organização, <code>Not set</code> significa que ela não impõe um estado para o recurso; o valor já definido no repositório continua valendo. Isso não desliga Security updates. Para desabilitar, é preciso conferir o estado efetivo nas configurações do repositório ou aplicar <code>Disabled</code> pela configuração da organização.
+
 Rulesets e proteção de branch definem condições de merge, como checks obrigatórios. São separados de habilitar grafo, alertas e atualizações. Uma regra que exige um job sempre pulado não proporciona a revisão indicada pelo nome.
 
 ## Exemplo usado nos testes
@@ -93,7 +95,7 @@ Na mesma validação, Dependency Review apareceu como <code>skipped</code> porqu
 
 Este retrato pode mudar e não substitui as configurações atuais:
 
-- Na configuração de segurança da organização relatada na conversa, Dependency graph, Dependabot alerts e Security updates apareciam habilitados. Automatic dependency submission, restrição a dismiss direto e Malware alerts estavam como <code>Not set</code>.
+- Na configuração de segurança da organização, Dependency graph e Dependabot alerts foram vistos como habilitados. Security updates foi depois informado como <code>Not set</code>; nesse estado, a organização não altera o valor que já está definido no repositório. Automatic dependency submission, restrição a dismiss direto e Malware alerts estavam como <code>Not set</code>.
 - CodeQL/Code Scanning está em **Default setup**, conforme o README do projeto.
 - A leitura atual identificou um ruleset **do repositório**, ativo para a branch padrão e com <code>Dependency Review</code> como check obrigatório. Isso é diferente de uma configuração de segurança da organização.
 - O workflow Dependency Review está temporariamente pulado pela condição descrita acima.
