@@ -91,6 +91,14 @@ O PR de teste foi mesclado à <code>main</code> para permitir observar o comport
 
 Na mesma validação, Dependency Review apareceu como <code>skipped</code> porque o job estava condicionalmente desativado. A leitura atual do ruleset mostrou que ele ainda espera esse nome como check obrigatório; isso não significa que o job tenha analisado o PR.
 
+## Exemplo combinado de Code Scanning e Dependabot
+
+No PR de demonstração aberto nesta branch, o CodeQL identificou um novo alerta de alta severidade de SQL injection no exemplo Java isolado em teste. O build do Maven passou. Isso confirma que o Code Scanning analisa o código alterado no PR, mesmo quando o exemplo não está conectado a uma rota da aplicação.
+
+O mesmo PR adiciona `org.apache.commons:commons-configuration2` versão `2.14.0`, em escopo `test`, associada ao advisory moderado [GHSA-337m-mw94-2v6g](https://github.com/advisories/GHSA-337m-mw94-2v6g); a versão corrigida indicada é `2.15.0`. O check **Dependency Review** apareceu como `skipped`, pois o job está temporariamente condicionado para não executar. Portanto, ele não avaliou a mudança de dependência neste PR.
+
+A distinção prática: **Dependabot alerts** registra vulnerabilidades encontradas no grafo do repositório; **Dependency Review** é o check que avalia a alteração de dependência dentro do PR. Com o workflow de Dependency Review pulado, não se deve esperar que esse check valide a dependência. Não mescle uma dependência vulnerável à branch principal apenas para testar sem decidir conscientemente: ao chegar à branch padrão, pode surgir um alerta do Dependabot e, dependendo da configuração efetiva no repositório, uma atualização automática.
+
 ## Estado observado durante esta compilação
 
 Este retrato pode mudar e não substitui as configurações atuais:
