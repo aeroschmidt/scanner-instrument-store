@@ -10,13 +10,20 @@ permissions:
 
 jobs:
   dependency-review:
-    # Temporarily disabled: the current rollout uses Dependabot for dependency visibility only.
-    # Keep the required check context; GitHub reports a conditionally skipped job as successful.
-    # Remove this condition when Dependency Review enforcement is intentionally enabled again.
-    if: ${{ false }}
     name: Dependency Review
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check the Secret Scanning demo marker
+        shell: bash
+        run: |
+          if grep -R -n --fixed-strings 'DEMO_SECRET_SCANNING_BLOCK_MERGE' docs/security; then
+            echo '::error::Demonstration marker found. This required PR check is intentionally failing.'
+            exit 1
+          fi
+          echo 'No demonstration marker found.'
+
       - name: Review dependency changes
         uses: actions/dependency-review-action@v4
         with:
