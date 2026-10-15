@@ -1,146 +1,147 @@
-# Guia do usuário para Code Scanning em Pull Requests
+GITHUB SECURITY  /  PULL REQUESTS
 
-Este guia é para pessoas que abrem ou revisam Pull Requests. Ele mostra como localizar um resultado do Code Scanning, entender o que o alerta está dizendo e decidir o próximo passo. A equipe que mantém o repositório configura a ferramenta; este guia trata do trabalho de quem contribui com código.
+# Guia de Code Scanning para usuários
 
-> **Leitura importante das capturas:** as telas abaixo são exemplos de treinamento para explicar a interface do GitHub. Uma delas mostra uma vulnerabilidade intencional em um exercício isolado. Não replique esse código em um projeto real. A aparência e os nomes dos botões podem variar conforme as configurações do repositório.
+Como investigar, corrigir e confirmar um alerta no seu [Pull Request](https://docs.github.com/en/pull-requests/get-started/about-pull-requests) (PR)
 
-## 1. O que o Code Scanning faz
+Use este guia ao receber um alerta de Code Scanning em um Pull Request. Investigue e corrija; consulte o final para exceções e Dismiss.
 
-Code Scanning analisa o código-fonte em busca de padrões de falha e vulnerabilidade. Com CodeQL, o GitHub executa consultas de análise estática e pode relacionar um dado de entrada à operação que o utiliza. Quando encontra algo, pode registrar um alerta com regra, severidade, arquivo e localização.
+> **Fluxo recomendado**
+> Aguarde a análise → abra o alerta → confira regra, severidade e trecho → corrija → envie um commit → confirme a nova análise.
 
-O alerta é uma indicação para revisão. Leia os detalhes no contexto do código antes de decidir. Um resultado sem alertas significa que a análise executada não relatou um achado reconhecido; não prova que todo o código está seguro.
+## Resolva o alerta no PR
 
-## Exemplo visual: PR, vulnerabilidade e correção
+1. Aguarde a análise. Na aba [Checks](https://docs.github.com/en/pull-requests/reference/status-checks), abra [Code scanning results](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/triage-alerts-in-pull-requests).
 
-As capturas desta sequência vêm do exercício isolado **Introduction to CodeQL**. Elas registram uma alteração em Python feita no projeto de treinamento. O guia reaproveita somente as imagens e a explicação: nenhum arquivo de aplicação vulnerável, workflow ou alerta foi movido para o projeto da loja. Trate os nomes, linhas e estados como evidência histórica do exercício.
+1. Abra a anotação no PR ou em Security and quality → Code scanning. Ela aparece quando o alerta novo atinge linhas do diff.
 
-### Abertura do PR e detecção
+1. Leia regra, severidade, arquivo e linha; confira o código e o [diff](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/triage-alerts-in-pull-requests). Se houver [Show paths](https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning-alerts), siga o fluxo até o uso.
 
-A primeira captura mostra o PR de treinamento aberto, com o check do CodeQL e o alerta High visíveis. Em **Files changed**, o diff compara a consulta parametrizada que existia antes com a concatenação insegura introduzida no exercício. A anotação do CodeQL aponta o trecho e também mostra uma sugestão de correção parametrizada.
+1. Confirme o achado; se houver dúvida, consulte o revisor ou a equipe de segurança. Se não puder corrigir neste PR, não use Dismiss para liberar: mantenha o alerta aberto e combine o encaminhamento.
 
-![PR de treinamento aberto: checks do CodeQL e alerta High](capturas/code-scanning-pr-open.png)
+1. Se confirmado, corrija a causa, ajuste testes se necessário e envie um commit na [branch](https://docs.github.com/en/pull-requests/reference/branches) do PR.
 
-![Diff antes/depois: consulta parametrizada substituída por concatenação; CodeQL mostra a sugestão segura](codeql-learning-materials/.github/images/code-scan-results.png)
+1. Após a nova análise, confirme [Fixed](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts) e que compilação/testes do GitHub Actions passaram. Sem alerta novo não prova ausência de vulnerabilidades: confira arquivos e linguagens cobertos. O [merge](https://docs.github.com/en/pull-requests/get-started/about-pull-requests) segue as regras do repositório.
 
-A lista de **Code scanning** permite localizar o alerta; ao abri-lo, a página mostra a regra, a severidade e o arquivo/linha. A tela seguinte é a evidência do alerta já localizado no código do exercício.
+![Captura de treinamento 1](codeql-learning-materials/.github/images/dismissal-pr-checks.png)
 
-![Lista Code Scanning do exercício de treinamento](capturas/code-scanning-alert-list-example.png)
+Exemplo histórico de um PR de treinamento com check do CodeQL e alerta High. Não é um PR de produção.
 
-![Detalhe do alerta CodeQL no exercício de treinamento](capturas/code-scanning-alert-detail-example.png)
+> **Importante**
+> Compilação/testes do [GitHub Actions](https://docs.github.com/en/pull-requests/reference/status-checks) e alertas do [Code Scanning](https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning-alerts) são resultados distintos. O primeiro pode passar mesmo com alertas; o [merge](https://docs.github.com/en/pull-requests/get-started/about-pull-requests) depende das [regras do repositório](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
 
-### Depois da correção
+## Entenda o que o alerta aponta
 
-Após restaurar a consulta parametrizada no exercício, a timeline do alerta registra que ele foi corrigido. **Fixed** significa que uma nova análise confirmou que o problema não está mais presente; isso é diferente de **Dismiss**, que registra uma decisão de não corrigir o alerta.
+A lista Code scanning mostra alertas abertos. No detalhe, confira regra, severidade, localização e, se disponível, fluxo de dados. A severidade orienta a prioridade; avalie o contexto.
 
-![Timeline do alerta depois da correção do código](codeql-learning-materials/.github/images/audit-trail-fixed-alert.png)
+![Captura de treinamento 2](codeql-learning-materials/.github/images/dismissal-alert-list.png)
 
-## 2. Onde o resultado aparece
+Lista de alertas do exercício: selecione o achado para abrir seus detalhes.
 
-### No Pull Request
+![Captura de treinamento 3](codeql-learning-materials/.github/images/dismissal-alert-detail.png)
 
-A seção **Checks** informa se a análise terminou e se o check passou. Alguns checks de Code Scanning também mostram a quantidade de novos alertas e anotações na alteração.
+Detalhe do alerta: regra, severidade e localização da linha destacada.
 
-![Exemplo de check de CodeQL no PR com uma descoberta de severidade alta](codeql-learning-materials/.github/images/dismissal-pr-checks.png)
+## Exemplo visual de uma vulnerabilidade
 
-Essa tela mostra um check de segurança que encontrou um alerta. Isso é diferente de uma falha de compilação ou teste: abra o check correspondente e leia o resumo para saber qual etapa terminou em falha e por quê. Um alerta pode ser encontrado mesmo se o build Maven ou outra suíte de testes passar.
+As imagens mostram um exercício isolado de CodeQL: uma consulta SQL parametrizada e segura e outra com concatenação insegura, que gera um alerta. Não copie o código vulnerável para sistemas reais.
 
-### Na área de segurança do repositório
+![Captura de treinamento 4](capturas/05-antes-busca-parametrizada.png)
 
-A lista de **Security and quality → Code scanning** reúne alertas do repositório. Abra o alerta para ver a severidade, a regra e a localização.
+ANTES — parâmetros separam a instrução SQL dos dados.
 
-![Exemplo da lista Code Scanning com um alerta aberto](codeql-learning-materials/.github/images/dismissal-alert-list.png)
+![Captura de treinamento 5](capturas/06-depois-concatenacao-sql.png)
 
-### Nos detalhes do alerta
+DEPOIS — a concatenação da entrada cria o cenário vulnerável do exercício.
 
-A página do alerta pode destacar linhas do código, indicar a regra e oferecer informações adicionais, como o caminho dos dados. Use esses detalhes para entender de onde vem o dado e onde ele é usado.
+![Captura de treinamento 6](codeql-learning-materials/.github/images/code-scan-results.png)
 
-![Exemplo dos detalhes do alerta, incluindo localização e ação Dismiss alert](codeql-learning-materials/.github/images/dismissal-alert-detail.png)
+O diff do PR mostra a alteração e a anotação do CodeQL no trecho detectado.
 
-## 3. Como investigar um alerta
+## Confirme a correção
 
-1. Abra o alerta a partir do PR ou da lista **Code scanning**.
-2. Leia o título, a descrição da regra e a severidade.
-3. Verifique o arquivo e as linhas indicadas. Leia o código ao redor e o diff completo do PR.
-4. Se houver **Show paths** ou visualização de fluxo de dados, siga a origem da entrada e o ponto onde ela é utilizada.
-5. Compare o achado com o comportamento real da alteração. Considere validações, sanitização, permissões e outros controles presentes no código.
-6. Se não souber avaliar o risco, peça ajuda ao revisor ou à equipe responsável pela segurança antes de fechar o alerta.
+Após corrigir, aguarde a análise e reabra o alerta. [Fixed](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts) indica que a nova análise confirmou a correção no [branch](https://docs.github.com/en/pull-requests/reference/branches) examinado. Confira também o [diff](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/triage-alerts-in-pull-requests) e os testes.
 
-Uma recomendação automática é um ponto de partida. Confirme que ela se aplica ao contexto antes de alterar o código.
+![Captura de treinamento 7](codeql-learning-materials/.github/images/audit-trail-fixed-alert.png)
 
-## 4. Resposta preferida: corrigir o código
+Exemplo de timeline depois que a análise reconhece a correção como Fixed.
 
-Quando o alerta é válido, corrija a causa no código. Faça a alteração em uma branch, inclua ou ajuste testes quando apropriado, atualize o PR e aguarde uma nova execução do Code Scanning.
+> **Fixed é diferente de Dismiss**
+> Fixed confirma uma alteração que remove o problema. Dismiss encerra o alerta sem corrigir o código; veja a seção de referência ao final.
 
-Depois da nova análise, volte aos detalhes do alerta. Confirme se foi corrigido ou se ainda existe uma instância aberta. A correção deve remover o risco; não basta esconder o alerta.
+## Referência complementar
 
-## 5. Quando usar Dismiss
+### Se não for possível corrigir: use Dismiss com responsabilidade
 
-Use **Dismiss** somente depois de examinar o alerta e concluir que não é necessária uma alteração no código. Exemplos possíveis incluem um falso positivo confirmado, código limitado a testes ou um risco que a equipe analisou e decidiu aceitar. Siga sempre a política de segurança e as permissões do repositório.
+Use [Dismiss](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts) somente após confirmar que o alerta não exige correção, como num falso positivo confirmado, código de teste ou risco aceito pela equipe. Siga a política do repositório e peça triagem em caso de dúvida.
 
-1. Abra o alerta e verifique sua descrição, localização, severidade e fluxo de dados.
-2. Selecione **Dismiss alert** e escolha o motivo que corresponde à análise.
-3. Registre um comentário claro com a justificativa e o contexto necessário.
-4. Confirme o Dismiss e verifique se o alerta aparece na lista **Closed** com o motivo e comentário esperados.
+1. Revise descrição, severidade, localização, diff e fluxo de dados.
 
-A lista de motivos disponível pode variar de acordo com a ferramenta e a interface.
+1. Clique em Dismiss alert e escolha o motivo correspondente à análise.
 
-![Exemplo das opções de motivo para Dismiss](codeql-learning-materials/.github/images/dismiss-alert-options.png)
+1. Registre evidências, revisor, se a decisão é temporária ou permanente e o acompanhamento combinado.
 
-A imagem seguinte ilustra que o evento e a justificativa ficam registrados na timeline do alerta.
+1. Confirme o Dismiss e verifique o alerta em Closed, com motivo e comentário na timeline.
 
-![Exemplo de registro de Dismiss na timeline de auditoria](codeql-learning-materials/.github/images/audit-log-alert-dismissed.png)
+> **Permissão e aprovação**
+> A opção de Dismiss normalmente exige permissão de escrita. A organização pode também exigir [aprovação delegada](https://docs.github.com/en/code-security/concepts/security-at-scale/delegated-alert-dismissal). Se a tela pedir aprovação, registre a justificativa e aguarde a pessoa autorizada.
 
-### O que o Dismiss muda
+![Captura de treinamento 8](codeql-learning-materials/.github/images/dismiss-alert-options.png)
 
-O Dismiss altera o estado do alerta, mas não corrige o código. De acordo com a documentação do GitHub, o Dismiss se aplica a todos os branches, remove o alerta da contagem atual de alertas abertos e o move para **Closed**, onde pode ser reaberto. O motivo fica registrado e o comentário opcional aparece na timeline. Na próxima análise, o mesmo código não gera o mesmo alerta. A escolha do motivo também pode influenciar se a consulta continuará incluída em análises futuras.
+A tela pede um motivo; o comentário registra o contexto da decisão.
 
-**Não use Dismiss para deixar o check verde.** Se o risco for real, corrija o código. Se a equipe aceitar a exceção, registre uma justificativa que possa ser entendida em uma revisão ou auditoria futura.
+![Captura de treinamento 9](codeql-learning-materials/.github/images/audit-log-alert-dismissed.png)
+
+Exemplo do evento de Dismiss registrado na timeline do alerta.
+
+### O que Dismiss faz — e o que não faz
+
+- Fecha o alerta em todos os branches e o move para Closed; é possível reabri-lo.
+
+- Remove o item da contagem atual de alertas abertos e registra o motivo escolhido.
+
+- O comentário é opcional na interface, mas recomendado para auditoria e revisão futura.
+
+- Na próxima análise, o mesmo código não gera o mesmo alerta; o motivo pode afetar futuras execuções da regra.
+
+- Não altera o código, não elimina o risco e não libera o merge por si só.
 
 ### Modelo de comentário para Dismiss
 
-Adapte este exemplo à decisão aprovada pela equipe:
+> **Adapte ao caso real**
+> Revisor e data: [pessoa/equipe], [data]. Motivo: [motivo]. Evidência: [contexto]. Decisão: [temporária/permanente]. Acompanhamento: [ação e responsável]. Prazo ou data de revisão (se aplicável): [data].
 
-> Revisado por [pessoa/equipe] em [data]. Motivo: [motivo do Dismiss]. O alerta não exige alteração de código porque [evidências]. A decisão é [temporária/permanente]. Controle ou acompanhamento: [ação], responsável [pessoa/equipe], prazo [data].
+### Dicas rápidas
 
-Registre também se a decisão foi revisada por outra pessoa. Se for temporária, inclua um prazo e uma tarefa de acompanhamento.
+| O que aparece | Como interpretar | O que fazer |
+| --- | --- | --- |
+| Verificação em andamento | Análise ainda não terminou. | Aguarde antes de tirar conclusões. |
+| Alerta novo no diff | Achado em linha alterada no PR. | Abra detalhes e investigue. |
+| GitHub Actions: compilação/testes falharam | A compilação do projeto falhou ou um teste não passou. | Abra a execução e leia o log. |
+| Verificação do Code Scanning falhou | Pode ser falha na análise ou uma regra configurada para bloquear determinados alertas. | Leia o resumo e abra os detalhes da análise. |
+| Nenhum alerta novo | A análise não reportou novo achado no escopo executado. | Confirme que rodou e cobriu o código/linguagem. |
+| Fechado (Closed) | Alerta corrigido ou dispensado. | Confira a timeline para distinguir Fixed de Dismiss. |
 
-### Aprovação delegada
+### Checklist antes de aprovar ou pedir merge
 
-Algumas organizações podem configurar **delegated alert dismissal** para exigir revisão antes de concluir certos Dismiss. Se a interface pedir uma solicitação de aprovação, explique o motivo e aguarde a decisão da pessoa autorizada. Não tente contornar essa etapa.
+☐  Verificações concluídas; alertas separados de falhas de compilação/testes do GitHub Actions.
 
-## 6. Diferenças que evitam confusão
+☐  Cada alerta novo foi investigado no contexto do diff.
 
-| O que você vê | O que significa | Próxima ação |
-|---|---|---|
-| Code Scanning está em execução | A análise ainda não terminou | Aguarde e depois leia o resultado |
-| Code Scanning reporta um alerta | A ferramenta identificou um padrão que precisa ser revisado | Abra o alerta e avalie o código |
-| Build ou testes falham | A compilação ou uma etapa de teste não passou | Abra o job que falhou e investigue o log |
-| Check de Code Scanning falha | Pode haver alertas novos ou outra condição de segurança configurada | Leia o resumo do check e os alertas |
-| Não há alerta novo no PR | A análise executada não reportou novos achados para as mudanças verificadas | Confira se a análise rodou e se cobre a linguagem e o código |
-| Alerta em Closed | O alerta foi corrigido ou recebeu Dismiss | Abra a timeline para confirmar como foi resolvido |
+☐  Achados válidos foram corrigidos e reanalisados.
 
-Um check vermelho não significa necessariamente que os testes de aplicação falharam. Da mesma forma, um check verde não substitui a revisão do diff nem garante ausência de vulnerabilidades.
+☐  Dismiss tem motivo e evidência; aprovação exigida foi obtida.
 
-## 7. Checklist para autores e revisores
+☐  A revisão humana do PR segue a política do repositório.
 
-### Antes de pedir revisão
+### Referências oficiais
 
-- [ ] Li os checks e confirmei quais tarefas realmente foram executadas.
-- [ ] Investiguei cada alerta novo e conferi o trecho no contexto do diff.
-- [ ] Corrigi os achados válidos ou pedi triagem à equipe responsável.
-- [ ] Para qualquer Dismiss, registrei o motivo e o contexto conforme a política da equipe.
-- [ ] Não incluí credenciais ou dados reais de clientes em exemplos.
+[Triagem de alertas em Pull Requests](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/triage-alerts-in-pull-requests)
 
-### Durante a revisão
+[Resolver alertas de Code Scanning](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts)
 
-- [ ] O diff corresponde ao objetivo descrito no PR.
-- [ ] Entendi os alertas e as falhas de build ou teste separadamente.
-- [ ] A justificativa de cada Dismiss tem evidência suficiente e responsável identificável.
-- [ ] A aprovação segue as regras do repositório; checks automáticos não substituem aprovação humana.
+[Sobre alertas de Code Scanning](https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning-alerts)
 
-## 8. Referências oficiais
+[Dismiss delegado de alertas](https://docs.github.com/en/code-security/concepts/security-at-scale/delegated-alert-dismissal)
 
-- [Resolver alertas de Code Scanning](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/resolve-alerts)
-- [Fazer triagem de alertas em Pull Requests](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-code-scanning-alerts/triage-alerts-in-pull-requests)
-- [Dismiss delegado de alertas](https://docs.github.com/en/code-security/concepts/security-at-scale/delegated-alert-dismissal)
-- [Sobre alertas do Code Scanning](https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning-alerts)
+Capturas de treinamento; interface e políticas variam conforme ferramenta e repositório. Documentação oficial consultada em 12 de outubro de 2026.

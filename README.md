@@ -43,6 +43,8 @@ Copilot Autofix appears enabled in the settings, but it depends on CodeQL alerts
 
 The observed state and separate procedures for maintainers and PR authors are in the [maintainer guide in Word](docs/guia-github-actions-e-seguranca.docx) and [Markdown](docs/guia-github-actions-e-seguranca.md), and the [PR author guide in Word](docs/guia-usuario-prs.docx) and [Markdown](docs/guia-usuario-prs.md). Screenshots are in `docs/capturas/`. These guides remain in Portuguese. The focused [Code Scanning guide for PR authors and reviewers](docs/guia-usuario-code-scanning.md) is available in Portuguese.
 
+The [security guides for PR authors and reviewers](docs/README-guias-usuarios.md) cover Code Scanning, Dependabot, and Secret Scanning in Portuguese, with matching Word versions and links to official documentation.
+
 ### Agreed testing sequence
 
 > **Reminder:** test and document one GitHub feature at a time to understand what each check does.
