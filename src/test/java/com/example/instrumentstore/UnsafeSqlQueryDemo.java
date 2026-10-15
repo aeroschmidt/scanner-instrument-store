@@ -2,9 +2,9 @@ package com.example.instrumentstore;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * Intentionally vulnerable, test-only fixture for the CodeQL demonstration.
@@ -17,8 +17,9 @@ final class UnsafeSqlQueryDemo {
 
     static ResultSet searchByName(HttpServletRequest request, Connection connection) throws SQLException {
         String name = request.getParameter("name");
-        Statement statement = connection.createStatement();
-        String query = "SELECT id, name FROM products WHERE name = '" + name + "'";
-        return statement.executeQuery(query);
+        String query = "SELECT id, name FROM products WHERE name = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, name);
+        return statement.executeQuery();
     }
 }
